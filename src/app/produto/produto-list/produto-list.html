@@ -1,0 +1,45 @@
+<div class="container">
+  <h1>Lista de Produtos</h1>
+
+  <button class="btn-add" routerLink="/produtos/novo">Adicionar Produto</button>
+
+  <div *ngIf="mensagemErro" class="error-message">
+    {{ mensagemErro }}
+  </div>
+
+  <table *ngIf="!mensagemErro && produtos.length > 0">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nome</th>
+        <th>Preço (Unidade)</th>
+        <th>Preço (KG)</th>
+        <th>Validade</th>
+        <th>Status</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let produto of produtos">
+        <td>{{ produto.id }}</td>
+        <td>{{ produto.nome }}</td>
+        <td>{{ produto.precoUnidade | currency:'BRL' }}</td>
+        <td>{{ produto.precoKg | currency:'BRL' }}</td>
+        <td>{{ produto.dataValidade | date:'dd/MM/yyyy' }}</td>
+        <td>
+          <span [class.active]="produto.ativo" [class.inactive]="!produto.ativo">
+            {{ produto.ativo ? 'Ativo' : 'Inativo' }}
+          </span>
+        </td>
+        <td>
+          <button class="btn-edit">Editar</button>
+          <button class="btn-delete">Excluir</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p *ngIf="!mensagemErro && produtos.length === 0">
+    Nenhum produto cadastrado.
+  </p>
+</div>
