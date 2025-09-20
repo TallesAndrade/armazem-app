@@ -1,13 +1,13 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { ProdutoListComponent } from './produto/produto-list/produto-list';
+import { Component } from '@angular/core';
+import { MainLayoutComponent } from './core/layout/main-layout/main-layout';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet,ProdutoListComponent],
-  templateUrl: './app.html',
-  styleUrl: './app.css'
+  standalone: true,
+  imports: [MainLayoutComponent], // Apenas o layout principal
+  template: '<app-main-layout></app-main-layout>', // Carrega o layout
+  styleUrls: ['./app.css']
 })
 export class App {
-  protected readonly title = signal('armazem-app');
+  title = 'armazem-app';
 }

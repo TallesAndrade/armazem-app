@@ -52,5 +52,9 @@ export class ProdutoService {
   activateProduto(id: number): Observable<void> {
     return this.http.patch<void>(`${this.apiUrl}/${id}/ativar`, {});
   }
+
+  getProdutosInativos(): Observable<Produto[]> {
+    return this.http.get<Produto[]>(`${this.apiUrl}/inativos`);
+  }
 }
 

@@ -1,0 +1,22 @@
+<header class="main-header">
+  <nav class="main-nav">
+    <div class="logo">
+      <a routerLink="/">Armazém da Margarete</a>
+    </div>
+    <ul class="nav-links">
+      <li>
+        <a routerLink="/produtos" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: false}">Produtos</a>
+      </li>
+      <li>
+        <a routerLink="/estoque" routerLinkActive="active-link">Estoque</a>
+      </li>
+      <li>
+        <a routerLink="/vendas" routerLinkActive="active-link">Vendas</a>
+      </li>
+    </ul>
+  </nav>
+</header>
+
+<main class="content">
+  <router-outlet></router-outlet>
+</main>
