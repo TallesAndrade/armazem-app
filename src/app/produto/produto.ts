@@ -1,10 +1,7 @@
-
-
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Produto } from './produto.model';
-
 
 export interface ProdutoRequest {
   nome: string;
@@ -15,12 +12,10 @@ export interface ProdutoRequest {
   ehPesavel: boolean;
 }
 
-
 @Injectable({
   providedIn: 'root'
 })
 export class ProdutoService {
-
   private apiUrl = 'http://localhost:8080/produtos';
 
   constructor(private http: HttpClient) { }
@@ -31,6 +26,10 @@ export class ProdutoService {
 
   getProdutosAtivos(): Observable<Produto[]> {
     return this.http.get<Produto[]>(`${this.apiUrl}/ativos`);
+  }
+
+  getProdutosInativos(): Observable<Produto[]> {
+    return this.http.get<Produto[]>(`${this.apiUrl}/inativos`);
   }
 
   getProdutoById(id: number): Observable<Produto> {
@@ -53,8 +52,15 @@ export class ProdutoService {
     return this.http.patch<void>(`${this.apiUrl}/${id}/ativar`, {});
   }
 
-  getProdutosInativos(): Observable<Produto[]> {
-    return this.http.get<Produto[]>(`${this.apiUrl}/inativos`);
+  searchProdutos(nome: string): Observable<Produto[]> {
+    return this.http.get<Produto[]>(`${this.apiUrl}/busca`, { params: { nome } });
+  }
+
+  searchProdutosAtivos(nome: string): Observable<Produto[]> {
+    return this.http.get<Produto[]>(`${this.apiUrl}/busca/ativos`, { params: { nome } });
+  }
+
+  searchProdutosInativos(nome: string): Observable<Produto[]> {
+    return this.http.get<Produto[]>(`${this.apiUrl}/busca/inativos`, { params: { nome } });
   }
 }
-
