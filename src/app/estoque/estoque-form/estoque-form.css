@@ -1,0 +1,69 @@
+/* Estilo para o fundo escurecido */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 1000; /* Fica atrás do modal */
+}
+
+/* Reutiliza estilos do formulário de produto */
+@import url('../../produto/produto-form/produto-form.css');
+
+/* Centraliza o conteúdo do modal */
+.modal-content {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1010; /* Fica na frente do fundo */
+  width: 90%;
+  max-width: 500px;
+}
+
+.current-stock {
+  display: flex;
+  justify-content: space-around;
+  background-color: #e9ecef;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.current-stock span {
+  font-size: 0.9rem;
+}
+
+.tabs {
+  display: flex;
+  margin-bottom: 20px;
+}
+
+.tabs button {
+  flex-grow: 1;
+  padding: 12px;
+  border: 1px solid #ccc;
+  background-color: #f0f0f0;
+  cursor: pointer;
+  border-radius: 0;
+  color: #333;
+}
+
+.tabs button:first-child {
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+
+.tabs button:last-child {
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+.tabs button.active-tab {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}

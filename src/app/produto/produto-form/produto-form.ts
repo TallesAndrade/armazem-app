@@ -5,7 +5,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router, ActivatedRoute, RouterLink } from '@angular/router'; // ActivatedRoute para ler a URL
 import { CommonModule } from '@angular/common';
 
-import { ProdutoService, ProdutoRequest } from '../produto';
+import { ProdutoService, ProdutoRequest } from '../produto.service';
 import { UnidadeMedida } from '../produto.model';
 import { Produto } from '../produto.model'; // Importamos o modelo completo
 

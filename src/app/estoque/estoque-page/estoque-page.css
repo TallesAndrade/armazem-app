@@ -1,15 +1,38 @@
-.placeholder-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 60vh;
-  color: #666;
-  text-align: center;
+/* Reutiliza os mesmos estilos da lista de produtos */
+@import url('../../produto/produto-list/produto-list.css');
+
+/* Estilos específicos para o status do estoque */
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: white;
+  text-transform: uppercase;
 }
-h2 {
-  font-size: 2rem;
+
+.status-ok {
+  background-color: #28a745; /* Verde */
 }
-p {
-  font-size: 1.2rem;
+
+.status-baixo {
+  background-color: #ffc107; /* Amarelo */
+  color: #333;
+}
+
+.status-esgotado {
+  background-color: #dc3545; /* Vermelho */
+}
+
+/* Adiciona um destaque na linha da tabela para estoque baixo ou esgotado */
+tr.baixo {
+  background-color: #fff3cd; /* Amarelo claro */
+}
+
+tr.esgotado {
+  background-color: #f8d7da; /* Vermelho claro */
+}
+
+tr.esgotado td {
+  color: #721c24;
 }

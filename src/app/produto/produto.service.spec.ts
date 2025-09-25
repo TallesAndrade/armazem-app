@@ -3,7 +3,7 @@
 import { TestBed } from '@angular/core/testing';
 
 // 1. Importe a classe correta: ProdutoService
-import { ProdutoService } from './produto';
+import { ProdutoService } from './produto.service';
 
 // 2. Corrija o nome no 'describe'
 describe('ProdutoService', () => {
@@ -11,7 +11,7 @@ describe('ProdutoService', () => {
   let service: ProdutoService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({});2
     // 4. Corrija a classe que está sendo injetada
     service = TestBed.inject(ProdutoService);
   });

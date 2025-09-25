@@ -1,4 +1,51 @@
-<div class="placeholder-container">
-  <h2>Página de Estoque</h2>
-  <p>Em desenvolvimento...</p>
+<div class="container">
+  <div class="page-header">
+    <h1>{{ pageTitle }}</h1>
+    </div>
+
+  <div *ngIf="mensagemErro" class="error-message">{{ mensagemErro }}</div>
+
+  <div class="toolbar">
+    <nav class="tabs">
+      <a routerLink="/estoque/ativos" routerLinkActive="active-tab">Ativos</a>
+      <a routerLink="/estoque/inativos" routerLinkActive="active-tab">Inativos</a>
+      <a routerLink="/estoque/todos" routerLinkActive="active-tab">Todos</a>
+    </nav>
+    <div class="search-bar">
+      <input type="text" placeholder="Buscar por nome do produto..." [formControl]="searchControl">
+    </div>
+  </div>
+
+  <table *ngIf="!mensagemErro && estoques.length > 0">
+    <thead>
+      <tr>
+        <th>ID Produto</th>
+        <th>Nome do Produto</th>
+        <th>Qtd. (Kg)</th>
+        <th>Qtd. (Un)</th>
+        <th>Estoque Mínimo</th>
+        <th>Status</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of estoques" [ngClass]="getStatusEstoque(item)">
+        <td>{{ item.produtoId }}</td>
+        <td>{{ item.produtoNome }}</td>
+        <td>{{ item.quantidadeKg ?? 'N/A' }}</td>
+        <td>{{ item.quantidadeUnidades ?? 'N/A' }}</td>
+        <td>{{ item.quantidadeMinima ?? 'N/A' }}</td>
+        <td>
+          <span class="status-badge" [ngClass]="'status-' + getStatusEstoque(item)">
+            {{ getStatusEstoque(item) | uppercase }}
+          </span>
+        </td>
+        <td class="actions">
+           <button class="btn-edit" [routerLink]="['/estoque/ajustar', item.id]">Ajustar Saldo</button> 
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p *ngIf="!mensagemErro && estoques.length === 0">Nenhum item de estoque encontrado.</p>
 </div>

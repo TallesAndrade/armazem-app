@@ -3,7 +3,7 @@ import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
 import { provideHttpClient } from '@angular/common/http';
-import { ProdutoService } from './produto/produto';
+import { ProdutoService } from './produto/produto.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [

@@ -3,10 +3,10 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
-import { debounceTime, distinctUntilChanged, startWith, switchMap, tap } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, startWith, switchMap } from 'rxjs/operators';
 
 import { Produto } from '../produto.model';
-import { ProdutoService } from '../produto';
+import { ProdutoService } from '../produto.service';
 
 @Component({
   selector: 'app-produto-list',
@@ -33,23 +33,24 @@ export class ProdutoListComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Este bloco agora é "reativo". Ele escuta tanto a URL quanto a busca.
-    this.route.paramMap.pipe(
-      // 1. Pega o filtro da URL (ativos, inativos, todos)
-      tap(params => {
-        this.activeFilter = params.get('filter') || 'ativos';
-        this.atualizarTitulo();
-      }),
-      // 2. Com base no filtro, começa a escutar o campo de busca
-      switchMap(() =>
-        this.searchControl.valueChanges.pipe(
-          startWith(''), // Garante a primeira carga de dados
-          debounceTime(300), // Espera 300ms após o usuário parar de digitar
-          distinctUntilChanged(), // Evita buscas repetidas com o mesmo texto
-          // 3. Cancela a busca anterior e faz uma nova com o termo atual
-          switchMap(searchTerm => this.carregarProdutos(searchTerm || ''))
-        )
-      )
+    // Detecta o filtro pela URL atual
+    const url = this.router.url;
+    if (url.includes('/produtos/ativos')) {
+      this.activeFilter = 'ativos';
+    } else if (url.includes('/produtos/inativos')) {
+      this.activeFilter = 'inativos';
+    } else if (url.includes('/produtos/todos')) {
+      this.activeFilter = 'todos';
+    }
+
+    this.atualizarTitulo();
+
+    // Configura a busca reativa
+    this.searchControl.valueChanges.pipe(
+      startWith(''),
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap(searchTerm => this.carregarProdutos(searchTerm || ''))
     ).subscribe({
       next: (dados) => {
         this.produtos = dados;
@@ -59,7 +60,6 @@ export class ProdutoListComponent implements OnInit {
     });
   }
 
-  // A função agora recebe o termo da busca como parâmetro
   carregarProdutos(searchTerm: string): Observable<Produto[]> {
     this.mensagemSucesso = null;
     this.mensagemErro = null;
@@ -88,6 +88,18 @@ export class ProdutoListComponent implements OnInit {
     }
   }
 
+  // Método para recarregar a lista atual
+  private recarregarLista(): void {
+    const currentSearch = this.searchControl.value || '';
+    this.carregarProdutos(currentSearch).subscribe({
+      next: (dados) => {
+        this.produtos = dados;
+        this.mensagemErro = null;
+      },
+      error: (erro) => this.handleError(erro)
+    });
+  }
+
   atualizarTitulo(): void {
     switch (this.activeFilter) {
       case 'todos': this.pageTitle = 'Todos os Produtos'; break;
@@ -101,8 +113,7 @@ export class ProdutoListComponent implements OnInit {
       this.produtoService.deleteProduto(id).subscribe({
         next: () => {
           this.handleSuccess(`Produto "${nome}" desativado com sucesso.`);
-          // Recarrega a lista para refletir a mudança
-          this.searchControl.setValue(this.searchControl.value);
+          this.recarregarLista(); // AUTO-RELOAD
         },
         error: (err) => this.handleError(err, 'desativar')
       });
@@ -114,8 +125,7 @@ export class ProdutoListComponent implements OnInit {
       this.produtoService.activateProduto(id).subscribe({
         next: () => {
           this.handleSuccess(`Produto "${nome}" reativado com sucesso.`);
-          // Recarrega a lista para refletir a mudança
-          this.searchControl.setValue(this.searchControl.value);
+          this.recarregarLista(); // AUTO-RELOAD
         },
         error: (err) => this.handleError(err, 'reativar')
       });
@@ -128,7 +138,6 @@ export class ProdutoListComponent implements OnInit {
   }
 
   private handleError(erro: any, acao: string = 'buscar'): void {
-    console.error(`Erro ao ${acao} produtos:`, erro);
     this.mensagemErro = `Não foi possível ${acao} os produtos. Verifique a API.`;
   }
 }

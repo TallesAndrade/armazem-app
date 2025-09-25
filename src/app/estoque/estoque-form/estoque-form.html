@@ -1,0 +1,42 @@
+<!-- Fundo escurecido do modal -->
+<div class="modal-backdrop" (click)="voltarParaLista()"></div>
+
+<!-- Conteúdo do formulário -->
+<div class="form-container modal-content">
+  <div *ngIf="estoqueItem">
+    <h2>Ajustar Saldo: {{ estoqueItem.produtoNome }}</h2>
+    <div class="current-stock">
+      <span>Estoque Atual (Kg): <strong>{{ estoqueItem.quantidadeKg ?? 0 | number:'1.2-2' }}</strong></span>
+      <span>Estoque Atual (Un): <strong>{{ estoqueItem.quantidadeUnidades ?? 0 }}</strong></span>
+    </div>
+  </div>
+  <h2 *ngIf="!estoqueItem && !mensagemErro">Carregando...</h2>
+  
+  <!-- Abas para selecionar a operação -->
+  <div class="tabs">
+    <button [class.active-tab]="modo === 'adicionar'" (click)="modo = 'adicionar'">Adicionar</button>
+    <button [class.active-tab]="modo === 'remover'" (click)="modo = 'remover'">Remover</button>
+  </div>
+
+  <div *ngIf="mensagemSucesso" class="message success">{{ mensagemSucesso }}</div>
+  <div *ngIf="mensagemErro" class="message error">{{ mensagemErro }}</div>
+
+  <form [formGroup]="ajusteForm" (ngSubmit)="onSubmit()" *ngIf="estoqueItem">
+    <div class.form-group>
+      <label for="quantidadeKg">Quantidade em KG</label>
+      <input id="quantidadeKg" formControlName="quantidadeKg" type="number" placeholder="0.00">
+    </div>
+
+    <div class.form-group>
+      <label for="quantidadeUnidades">Quantidade em Unidades</label>
+      <input id="quantidadeUnidades" formControlName="quantidadeUnidades" type="number" placeholder="0">
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" [disabled]="ajusteForm.invalid">
+        {{ modo === 'adicionar' ? 'Confirmar Entrada' : 'Confirmar Saída' }}
+      </button>
+      <button type="button" (click)="voltarParaLista()">Cancelar</button>
+    </div>
+  </form>
+</div>
