@@ -1,3 +1,6 @@
+/* Reutiliza estilos do formulário de produto */
+@import url('../../produto/produto-form/produto-form.css');
+
 /* Estilo para o fundo escurecido */
 .modal-backdrop {
   position: fixed;
@@ -9,8 +12,6 @@
   z-index: 1000; /* Fica atrás do modal */
 }
 
-/* Reutiliza estilos do formulário de produto */
-@import url('../../produto/produto-form/produto-form.css');
 
 /* Centraliza o conteúdo do modal */
 .modal-content {

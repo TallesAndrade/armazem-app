@@ -30,8 +30,8 @@ export class EstoqueFormComponent implements OnInit {
     private router: Router
   ) {
     this.ajusteForm = this.fb.group({
-      quantidadeKg: [null, [Validators.min(0)]],
-      quantidadeUnidades: [null, [Validators.min(0)]]
+      quantidadeKg: [null, [Validators.min(0.01)]], // Mudança: min(0.01) em vez de min(0)
+      quantidadeUnidades: [null, [Validators.min(1)]] // Mudança: min(1) em vez de min(0)
     });
   }
 
@@ -67,17 +67,21 @@ export class EstoqueFormComponent implements OnInit {
     const formValue = this.ajusteForm.value;
     const request: AlterarSaldoEstoqueRequest = {};
 
-    // Monta o objeto de requisição apenas com os campos preenchidos
-    if (formValue.quantidadeKg > 0) {
+    // Validação melhorada: verifica se há valores válidos (> 0) antes de montar o request
+    const quantidadeKgValida = formValue.quantidadeKg && formValue.quantidadeKg > 0;
+    const quantidadeUnidadesValida = formValue.quantidadeUnidades && formValue.quantidadeUnidades > 0;
+
+    // Monta o objeto de requisição apenas com os campos válidos
+    if (quantidadeKgValida) {
       request.quantidadeKg = formValue.quantidadeKg;
     }
-    if (formValue.quantidadeUnidades > 0) {
+    if (quantidadeUnidadesValida) {
       request.quantidadeUnidades = formValue.quantidadeUnidades;
     }
 
-    // Se nenhum valor foi inserido, não faz nada
-    if (Object.keys(request).length === 0) {
-        this.mensagemErro = "Informe uma quantidade para adicionar ou remover.";
+    // Validação: se nenhum valor válido foi inserido
+    if (!quantidadeKgValida && !quantidadeUnidadesValida) {
+        this.mensagemErro = "Informe uma quantidade maior que zero para adicionar ou remover.";
         return;
     }
 
@@ -92,10 +96,15 @@ export class EstoqueFormComponent implements OnInit {
       },
       error: (err) => {
         console.error('Erro ao ajustar saldo:', err);
-        // A mensagem de erro específica vem do backend (ex: "Saldo insuficiente")
-        this.mensagemErro = err.error?.message || 'Ocorreu um erro ao ajustar o saldo.';
+        this.mensagemErro = err.error?.message || err.message || 'Erro ao ajustar saldo';
       }
     });
+  }
+
+  // Limpa mensagens de erro quando o usuário troca de aba
+  onModoChange(): void {
+    this.mensagemErro = null;
+    this.mensagemSucesso = null;
   }
 
   // Navega de volta para a página de estoque

@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
-import { debounceTime, distinctUntilChanged, startWith, switchMap, tap } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, startWith, switchMap } from 'rxjs/operators';
 
 import { Estoque } from '../estoque.model';
 import { EstoqueService } from '../estoque.service';
@@ -26,23 +26,29 @@ export class EstoquePageComponent implements OnInit {
 
   constructor(
     private estoqueService: EstoqueService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private router: Router // Adicionar Router
   ) {}
 
   ngOnInit(): void {
-    this.route.paramMap.pipe(
-      tap(params => {
-        this.activeFilter = params.get('filter') || 'ativos';
-        this.atualizarTitulo();
-      }),
-      switchMap(() => 
-        this.searchControl.valueChanges.pipe(
-          startWith(''),
-          debounceTime(300),
-          distinctUntilChanged(),
-          switchMap(searchTerm => this.carregarEstoques(searchTerm || ''))
-        )
-      )
+    // Detecta o filtro pela URL atual (igual ao produto-list)
+    const url = this.router.url;
+    if (url.includes('/estoque/ativos')) {
+      this.activeFilter = 'ativos';
+    } else if (url.includes('/estoque/inativos')) {
+      this.activeFilter = 'inativos';
+    } else if (url.includes('/estoque/todos')) {
+      this.activeFilter = 'todos';
+    }
+
+    this.atualizarTitulo();
+
+    // Configura a busca reativa
+    this.searchControl.valueChanges.pipe(
+      startWith(''),
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap(searchTerm => this.carregarEstoques(searchTerm || ''))
     ).subscribe({
       next: (dados) => {
         this.estoques = dados;

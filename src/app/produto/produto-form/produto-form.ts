@@ -7,7 +7,6 @@ import { CommonModule } from '@angular/common';
 
 import { ProdutoService, ProdutoRequest } from '../produto.service';
 import { UnidadeMedida } from '../produto.model';
-import { Produto } from '../produto.model'; // Importamos o modelo completo
 
 @Component({
   selector: 'app-produto-form',
