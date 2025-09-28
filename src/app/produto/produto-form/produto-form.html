@@ -1,5 +1,5 @@
 <div class="form-container">
-  <h2>Adicionar Novo Produto</h2>
+  <h2>{{ isEditMode ? 'Editar Produto' : 'Adicionar Novo Produto' }}</h2>
 
   <div *ngIf="mensagemSucesso" class="message success">{{ mensagemSucesso }}</div>
   <div *ngIf="mensagemErro" class="message error">{{ mensagemErro }}</div>
@@ -17,16 +17,25 @@
         <option [ngValue]="null" disabled>Selecione...</option>
         <option *ngFor="let unidade of unidadesMedida" [value]="unidade">{{ unidade }}</option>
       </select>
+      <small class="form-help">
+        Ao selecionar a unidade, os campos de preço serão ajustados automaticamente.
+      </small>
     </div>
 
     <div class="form-group">
       <label for="precoKg">Preço por KG (R$)</label>
-      <input id="precoKg" formControlName="precoKg" type="number" placeholder="Ex: 5.99">
+      <input id="precoKg" formControlName="precoKg" type="number" step="0.01" placeholder="Ex: 5.99">
+      <div class="field-status" *ngIf="produtoForm.get('precoKg')?.disabled">
+        <small>Campo desabilitado para produtos vendidos por unidade</small>
+      </div>
     </div>
 
     <div class="form-group">
       <label for="precoUnidade">Preço por Unidade (R$)</label>
-      <input id="precoUnidade" formControlName="precoUnidade" type="number" placeholder="Ex: 2.50">
+      <input id="precoUnidade" formControlName="precoUnidade" type="number" step="0.01" placeholder="Ex: 2.50">
+      <div class="field-status" *ngIf="produtoForm.get('precoUnidade')?.disabled">
+        <small>Campo desabilitado para produtos vendidos por peso</small>
+      </div>
     </div>
     
     <div class="form-group">
@@ -34,13 +43,10 @@
       <input id="dataValidade" formControlName="dataValidade" type="date">
     </div>
 
-    <div class="form-group-checkbox">
-      <input id="ehPesavel" formControlName="ehPesavel" type="checkbox">
-      <label for="ehPesavel">Este produto é vendido por peso?</label>
-    </div>
-
     <div class="form-actions">
-      <button type="submit" [disabled]="produtoForm.invalid">Salvar Produto</button>
+      <button type="submit" [disabled]="produtoForm.invalid">
+        {{ isEditMode ? 'Atualizar Produto' : 'Salvar Produto' }}
+      </button>
       <button type="button" (click)="voltarParaLista()">Cancelar</button>
     </div>
   </form>

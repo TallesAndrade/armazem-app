@@ -6,34 +6,44 @@
   <div *ngIf="estoqueItem">
     <h2>Ajustar Saldo: {{ estoqueItem.produtoNome }}</h2>
     <div class="current-stock">
-      <span>Estoque Atual (Kg): <strong>{{ estoqueItem.quantidadeKg ?? 0 | number:'1.2-2' }}</strong></span>
-      <span>Estoque Atual (Un): <strong>{{ estoqueItem.quantidadeUnidades ?? 0 }}</strong></span>
+      <span *ngIf="estoqueItem.ehPesavel">Estoque Atual (Kg): <strong>{{ estoqueItem.quantidadeKg ?? 0 | number:'1.2-2' }}</strong></span>
+      <span *ngIf="!estoqueItem.ehPesavel">Estoque Atual (Un): <strong>{{ estoqueItem.quantidadeUnidades ?? 0 }}</strong></span>
     </div>
   </div>
   <h2 *ngIf="!estoqueItem && !mensagemErro">Carregando...</h2>
   
   <!-- Abas para selecionar a operação -->
   <div class="tabs">
-   <!-- Abas para selecionar a operação -->
-<div class="tabs">
-  <button [class.active-tab]="modo === 'adicionar'" (click)="modo = 'adicionar'; onModoChange()">Adicionar</button>
-  <button [class.active-tab]="modo === 'remover'" (click)="modo = 'remover'; onModoChange()">Remover</button>
-</div>
+    <button [class.active-tab]="modo === 'adicionar'" (click)="modo = 'adicionar'; onModoChange()">Adicionar</button>
+    <button [class.active-tab]="modo === 'remover'" (click)="modo = 'remover'; onModoChange()">Remover</button>
+  </div>
 
   <div *ngIf="mensagemSucesso" class="message success">{{ mensagemSucesso }}</div>
   <div *ngIf="mensagemErro" class="message error">{{ mensagemErro }}</div>
 
   <form [formGroup]="ajusteForm" (ngSubmit)="onSubmit()" *ngIf="estoqueItem">
-   <div class="form-group">
-    <label for="quantidadeKg">Quantidade em KG</label>
-    <input id="quantidadeKg" formControlName="quantidadeKg" type="number" placeholder="0.00">
+    <!-- Campo KG - só aparece se produto for pesável -->
+    <div class="form-group" *ngIf="estoqueItem.ehPesavel">
+      <label for="quantidadeKg">Quantidade em KG</label>
+      <input id="quantidadeKg" formControlName="quantidadeKg" type="number" step="0.01" placeholder="0.00">
+    </div>
+
+    <!-- Campo Unidades - só aparece se produto NÃO for pesável -->
+    <div class="form-group" *ngIf="!estoqueItem.ehPesavel">
+      <label for="quantidadeUnidades">Quantidade em Unidades</label>
+      <input id="quantidadeUnidades" formControlName="quantidadeUnidades" type="number" placeholder="0">
     </div>
 
     <div class="form-actions">
-      <button type="submit" [disabled]="ajusteForm.invalid">
+      <button type="submit" [disabled]="ajusteForm.invalid || !estoqueItem.ativo">
         {{ modo === 'adicionar' ? 'Confirmar Entrada' : 'Confirmar Saída' }}
       </button>
       <button type="button" (click)="voltarParaLista()">Cancelar</button>
+    </div>
+
+    <!-- Aviso se estoque estiver inativo -->
+    <div *ngIf="!estoqueItem.ativo" class="message error">
+      Este estoque está inativo e não pode ser alterado.
     </div>
   </form>
 </div>

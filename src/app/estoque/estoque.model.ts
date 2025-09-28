@@ -7,6 +7,8 @@ export interface Estoque {
   quantidadeKg: number | null;
   quantidadeUnidades: number | null;
   quantidadeMinima: number | null;
+  ehPesavel: boolean;
+  ativo: boolean;  
 }
 
 export interface AlterarSaldoEstoqueRequest {

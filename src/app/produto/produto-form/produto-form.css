@@ -84,3 +84,25 @@ button[type="button"] {
   background-color: #f8d7da;
   color: #721c24;
 }
+
+.form-help {
+  display: block;
+  margin-top: 5px;
+  color: #6c757d;
+  font-size: 0.875rem;
+}
+
+.field-status {
+  margin-top: 5px;
+}
+
+.field-status small {
+  color: #6c757d;
+  font-style: italic;
+}
+
+input:disabled {
+  background-color: #f8f9fa;
+  border-color: #dee2e6;
+  cursor: not-allowed;
+}

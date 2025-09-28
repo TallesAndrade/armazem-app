@@ -1,12 +1,11 @@
-// src/app/produto/produto-form/produto-form.ts
-
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router, ActivatedRoute, RouterLink } from '@angular/router'; // ActivatedRoute para ler a URL
+import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
 import { ProdutoService, ProdutoRequest } from '../produto.service';
 import { UnidadeMedida } from '../produto.model';
+import { Produto } from '../produto.model';
 
 @Component({
   selector: 'app-produto-form',
@@ -22,14 +21,14 @@ export class ProdutoFormComponent implements OnInit {
   mensagemSucesso: string | null = null;
   mensagemErro: string | null = null;
   
-  isEditMode = false; // Flag para saber se estamos editando
-  produtoId: number | null = null; // Para armazenar o ID do produto em edição
+  isEditMode = false;
+  produtoId: number | null = null;
 
   constructor(
     private fb: FormBuilder,
     private produtoService: ProdutoService,
     private router: Router,
-    private route: ActivatedRoute // Injetamos o ActivatedRoute
+    private route: ActivatedRoute
   ) {
     this.produtoForm = this.fb.group({
       nome: ['', Validators.required],
@@ -37,7 +36,7 @@ export class ProdutoFormComponent implements OnInit {
       precoKg: [null],
       precoUnidade: [null],
       dataValidade: ['', Validators.required],
-      ehPesavel: [false, Validators.required]
+      ehPesavel: [false] // Removido do template, mas mantido para compatibilidade
     });
   }
 
@@ -46,23 +45,63 @@ export class ProdutoFormComponent implements OnInit {
     this.route.params.subscribe(params => {
       if (params['id']) {
         this.isEditMode = true;
-        this.produtoId = +params['id']; // O '+' converte a string para número
+        this.produtoId = +params['id'];
         this.carregarDadosProduto(this.produtoId);
       }
     });
+
+    // Escuta mudanças na unidade de medida para aplicar lógica reativa
+    this.produtoForm.get('unidadeMedida')?.valueChanges.subscribe(unidade => {
+      this.aplicarLogicaUnidadeMedida(unidade);
+    });
+  }
+
+  aplicarLogicaUnidadeMedida(unidade: UnidadeMedida): void {
+    if (!unidade) return;
+
+    const precoKgControl = this.produtoForm.get('precoKg');
+    const precoUnidadeControl = this.produtoForm.get('precoUnidade');
+    const ehPesavelControl = this.produtoForm.get('ehPesavel');
+
+    if (unidade === UnidadeMedida.GRAMA || unidade === UnidadeMedida.KILO) {
+      // Produto pesável
+      ehPesavelControl?.setValue(true);
+      precoUnidadeControl?.setValue(0.0);
+      precoUnidadeControl?.disable();
+      precoKgControl?.enable();
+      
+      // Adiciona validação obrigatória para precoKg
+      precoKgControl?.setValidators([Validators.required, Validators.min(0.01)]);
+      precoUnidadeControl?.clearValidators();
+    } else if (unidade === UnidadeMedida.UNIDADE) {
+      // Produto por unidade
+      ehPesavelControl?.setValue(false);
+      precoKgControl?.setValue(0.0);
+      precoKgControl?.disable();
+      precoUnidadeControl?.enable();
+      
+      // Adiciona validação obrigatória para precoUnidade
+      precoUnidadeControl?.setValidators([Validators.required, Validators.min(0.01)]);
+      precoKgControl?.clearValidators();
+    }
+
+    // Atualiza as validações
+    precoKgControl?.updateValueAndValidity();
+    precoUnidadeControl?.updateValueAndValidity();
   }
 
   carregarDadosProduto(id: number): void {
     this.produtoService.getProdutoById(id).subscribe({
       next: (produto) => {
-        // Formata a data para o formato que o input[type=date] aceita (YYYY-MM-DD)
         const dataFormatada = new Date(produto.dataValidade).toISOString().split('T')[0];
         
-        // Preenche o formulário com os dados do produto
         this.produtoForm.patchValue({
           ...produto,
           dataValidade: dataFormatada
         });
+
+        // Aplica a lógica após carregar os dados
+        this.aplicarLogicaUnidadeMedida(produto.unidadeMedida);
       },
       error: (err) => {
         this.mensagemErro = 'Erro ao carregar os dados do produto.';
@@ -77,9 +116,19 @@ export class ProdutoFormComponent implements OnInit {
       return;
     }
 
-    const request: ProdutoRequest = this.produtoForm.value;
+    // Prepara o request incluindo campos desabilitados
+    const formValue = { ...this.produtoForm.value };
+    
+    // Inclui valores de campos desabilitados manualmente
+    if (this.produtoForm.get('precoKg')?.disabled) {
+      formValue.precoKg = this.produtoForm.get('precoKg')?.value;
+    }
+    if (this.produtoForm.get('precoUnidade')?.disabled) {
+      formValue.precoUnidade = this.produtoForm.get('precoUnidade')?.value;
+    }
 
-    // Se estiver em modo de edição, chama o update, senão, o create
+    const request: ProdutoRequest = formValue;
+
     if (this.isEditMode && this.produtoId) {
       this.produtoService.updateProduto(this.produtoId, request).subscribe({
         next: () => {

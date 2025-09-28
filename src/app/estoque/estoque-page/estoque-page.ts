@@ -90,8 +90,18 @@ export class EstoquePageComponent implements OnInit {
   }
 
   // Função para determinar o status do estoque
-  getStatusEstoque(item: Estoque): string {
-    const quantidade = item.quantidadeKg ?? item.quantidadeUnidades ?? 0;
+ getStatusEstoque(item: Estoque): string {
+    // Usa a quantidade correta baseada no tipo do produto
+    let quantidade: number;
+    
+    if (item.ehPesavel) {
+      // Produto pesável: usa quantidadeKg
+      quantidade = item.quantidadeKg ?? 0;
+    } else {
+      // Produto por unidade: usa quantidadeUnidades
+      quantidade = item.quantidadeUnidades ?? 0;
+    }
+    
     const minimo = item.quantidadeMinima ?? 0;
     
     if (quantidade <= 0) return 'esgotado';
