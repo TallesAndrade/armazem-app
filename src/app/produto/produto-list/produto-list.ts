@@ -108,14 +108,16 @@ export class ProdutoListComponent implements OnInit {
     }
   }
 
-  excluirProduto(id: number, nome: string): void {
+   excluirProduto(id: number, nome: string): void {
     if (confirm(`Tem certeza que deseja desativar o produto "${nome}"?`)) {
       this.produtoService.deleteProduto(id).subscribe({
         next: () => {
           this.handleSuccess(`Produto "${nome}" desativado com sucesso.`);
-          this.recarregarLista(); // AUTO-RELOAD
+          this.recarregarLista();
         },
-        error: (err) => this.handleError(err, 'desativar')
+        error: (err) => {
+          this.handleError(err, 'desativar');
+        }
       });
     }
   }
@@ -125,9 +127,11 @@ export class ProdutoListComponent implements OnInit {
       this.produtoService.activateProduto(id).subscribe({
         next: () => {
           this.handleSuccess(`Produto "${nome}" reativado com sucesso.`);
-          this.recarregarLista(); // AUTO-RELOAD
+          this.recarregarLista();
         },
-        error: (err) => this.handleError(err, 'reativar')
+        error: (err) => {
+          this.handleError(err, 'reativar');
+        }
       });
     }
   }
@@ -138,6 +142,19 @@ export class ProdutoListComponent implements OnInit {
   }
 
   private handleError(erro: any, acao: string = 'buscar'): void {
-    this.mensagemErro = `Não foi possível ${acao} os produtos. Verifique a API.`;
+    let mensagem: string;
+    
+    if (erro.error?.message) {
+      mensagem = erro.error.message;
+    } else if (erro.message) {
+      mensagem = erro.message;
+    } else if (erro.error?.error) {
+      mensagem = `${erro.error.error} (${erro.error.status})`;
+    } else {
+      mensagem = `Não foi possível ${acao} os produtos. Verifique a conexão.`;
+    }
+    
+    this.mensagemErro = mensagem;
+    console.error('Erro detalhado:', erro);
   }
 }

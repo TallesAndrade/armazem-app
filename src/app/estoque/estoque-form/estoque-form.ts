@@ -14,14 +14,15 @@ import { Estoque, AlterarSaldoEstoqueRequest } from '../estoque.model';
 })
 export class EstoqueFormComponent implements OnInit {
   ajusteForm: FormGroup;
+  quantidadeMinimaForm: FormGroup;
   estoqueItem: Estoque | null = null;
   estoqueId: number | null = null;
 
   mensagemSucesso: string | null = null;
   mensagemErro: string | null = null;
   
-  // Controla qual aba está ativa: 'adicionar' ou 'remover'
-  modo: 'adicionar' | 'remover' = 'adicionar';
+  // Controla qual aba está ativa: 'adicionar', 'remover' ou 'minimo'
+  modo: 'adicionar' | 'remover' | 'minimo' = 'adicionar';
 
   constructor(
     private fb: FormBuilder,
@@ -30,19 +31,21 @@ export class EstoqueFormComponent implements OnInit {
     private router: Router
   ) {
     this.ajusteForm = this.fb.group({
-      quantidadeKg: [null, [Validators.min(0.01)]], // Mudança: min(0.01) em vez de min(0)
-      quantidadeUnidades: [null, [Validators.min(1)]] // Mudança: min(1) em vez de min(0)
+      quantidadeKg: [null, [Validators.min(0.01)]],
+      quantidadeUnidades: [null, [Validators.min(1)]]
+    });
+
+    this.quantidadeMinimaForm = this.fb.group({
+      quantidadeMinima: [null, [Validators.required, Validators.min(0)]]
     });
   }
 
   ngOnInit(): void {
-    // Pega o ID do estoque a partir da URL
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.estoqueId = +id;
       this.carregarDadosEstoque(this.estoqueId);
     } else {
-      // Se não houver ID, volta para a lista
       this.voltarParaLista();
     }
   }
@@ -51,15 +54,24 @@ export class EstoqueFormComponent implements OnInit {
     this.estoqueService.getEstoqueById(id).subscribe({
       next: (data) => {
         this.estoqueItem = data;
+        // Preenche o form de quantidade mínima com o valor atual
+        this.quantidadeMinimaForm.patchValue({
+          quantidadeMinima: data.quantidadeMinima || 0
+        });
       },
       error: (err) => {
         console.error('Erro ao carregar item de estoque:', err);
-        this.mensagemErro = 'Não foi possível carregar os dados do item.';
+        this.mensagemErro = this.extrairMensagemErro(err);
       }
     });
   }
   
   onSubmit(): void {
+    if (this.modo === 'minimo') {
+      this.atualizarQuantidadeMinima();
+      return;
+    }
+
     if (this.ajusteForm.invalid || !this.estoqueId) {
       return;
     }
@@ -67,11 +79,9 @@ export class EstoqueFormComponent implements OnInit {
     const formValue = this.ajusteForm.value;
     const request: AlterarSaldoEstoqueRequest = {};
 
-    // Validação melhorada: verifica se há valores válidos (> 0) antes de montar o request
     const quantidadeKgValida = formValue.quantidadeKg && formValue.quantidadeKg > 0;
     const quantidadeUnidadesValida = formValue.quantidadeUnidades && formValue.quantidadeUnidades > 0;
 
-    // Monta o objeto de requisição apenas com os campos válidos
     if (quantidadeKgValida) {
       request.quantidadeKg = formValue.quantidadeKg;
     }
@@ -79,7 +89,6 @@ export class EstoqueFormComponent implements OnInit {
       request.quantidadeUnidades = formValue.quantidadeUnidades;
     }
 
-    // Validação: se nenhum valor válido foi inserido
     if (!quantidadeKgValida && !quantidadeUnidadesValida) {
         this.mensagemErro = "Informe uma quantidade maior que zero para adicionar ou remover.";
         return;
@@ -92,22 +101,63 @@ export class EstoqueFormComponent implements OnInit {
     operacao.subscribe({
       next: () => {
         this.mensagemSucesso = `Saldo do produto "${this.estoqueItem?.produtoNome}" atualizado com sucesso!`;
-        setTimeout(() => this.voltarParaLista(), 2000);
+        this.ajusteForm.reset();
+        this.carregarDadosEstoque(this.estoqueId!); // Atualiza os dados
+        setTimeout(() => this.mensagemSucesso = null, 3000);
       },
       error: (err) => {
         console.error('Erro ao ajustar saldo:', err);
-        this.mensagemErro = err.error?.message || err.message || 'Erro ao ajustar saldo';
+        this.mensagemErro = this.extrairMensagemErro(err);
       }
     });
   }
 
-  // Limpa mensagens de erro quando o usuário troca de aba
+  atualizarQuantidadeMinima(): void {
+    if (this.quantidadeMinimaForm.invalid || !this.estoqueId) {
+      return;
+    }
+
+    const quantidadeMinima = this.quantidadeMinimaForm.value.quantidadeMinima;
+    const request: AlterarSaldoEstoqueRequest = {};
+
+    // Define qual campo usar baseado no tipo do produto
+    if (this.estoqueItem?.ehPesavel) {
+      request.quantidadeKg = quantidadeMinima;
+    } else {
+      request.quantidadeUnidades = Math.floor(quantidadeMinima); // Garante que seja inteiro para unidades
+    }
+
+    this.estoqueService.alterarQuantidadeMinima(this.estoqueId, request).subscribe({
+      next: () => {
+        this.mensagemSucesso = `Quantidade mínima do produto "${this.estoqueItem?.produtoNome}" atualizada com sucesso!`;
+        this.carregarDadosEstoque(this.estoqueId!);
+        setTimeout(() => this.mensagemSucesso = null, 3000);
+      },
+      error: (err) => {
+        console.error('Erro ao atualizar quantidade mínima:', err);
+        this.mensagemErro = this.extrairMensagemErro(err);
+      }
+    });
+  }
+
+  // Extrai mensagem de erro da resposta da API
+  private extrairMensagemErro(err: any): string {
+    if (err.error?.message) {
+      return err.error.message;
+    } else if (err.message) {
+      return err.message;
+    } else if (err.error?.error) {
+      return `Erro ${err.error.status}: ${err.error.error}`;
+    }
+    return 'Ocorreu um erro inesperado. Tente novamente.';
+  }
+
   onModoChange(): void {
     this.mensagemErro = null;
     this.mensagemSucesso = null;
+    this.ajusteForm.reset();
   }
 
-  // Navega de volta para a página de estoque
   voltarParaLista(): void {
     this.router.navigate(['/estoque']);
   }

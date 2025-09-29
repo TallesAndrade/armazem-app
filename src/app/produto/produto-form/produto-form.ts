@@ -100,11 +100,10 @@ export class ProdutoFormComponent implements OnInit {
           dataValidade: dataFormatada
         });
 
-        // Aplica a lógica após carregar os dados
         this.aplicarLogicaUnidadeMedida(produto.unidadeMedida);
       },
       error: (err) => {
-        this.mensagemErro = 'Erro ao carregar os dados do produto.';
+        this.mensagemErro = this.extrairMensagemErro(err);
         console.error(err);
       }
     });
@@ -116,10 +115,8 @@ export class ProdutoFormComponent implements OnInit {
       return;
     }
 
-    // Prepara o request incluindo campos desabilitados
     const formValue = { ...this.produtoForm.value };
     
-    // Inclui valores de campos desabilitados manualmente
     if (this.produtoForm.get('precoKg')?.disabled) {
       formValue.precoKg = this.produtoForm.get('precoKg')?.value;
     }
@@ -136,7 +133,7 @@ export class ProdutoFormComponent implements OnInit {
           setTimeout(() => this.router.navigate(['/']), 2000);
         },
         error: (err) => {
-          this.mensagemErro = 'Erro ao atualizar o produto.';
+          this.mensagemErro = this.extrairMensagemErro(err);
           console.error(err);
         }
       });
@@ -147,7 +144,7 @@ export class ProdutoFormComponent implements OnInit {
           setTimeout(() => this.router.navigate(['/']), 2000);
         },
         error: (err) => {
-          this.mensagemErro = 'Erro ao salvar o produto.';
+          this.mensagemErro = this.extrairMensagemErro(err);
           console.error(err);
         }
       });
@@ -156,5 +153,16 @@ export class ProdutoFormComponent implements OnInit {
 
   voltarParaLista(): void {
     this.router.navigate(['/']);
+  }
+
+  private extrairMensagemErro(err: any): string {
+    if (err.error?.message) {
+      return err.error.message;
+    } else if (err.message) {
+      return err.message;
+    } else if (err.error?.error) {
+      return `Erro ${err.error.status}: ${err.error.error}`;
+    }
+    return 'Ocorreu um erro inesperado. Tente novamente.';
   }
 }

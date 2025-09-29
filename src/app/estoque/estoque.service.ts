@@ -8,7 +8,6 @@ import { AlterarSaldoEstoqueRequest, Estoque } from './estoque.model';
 })
 export class EstoqueService {
 
-  // A URL base da sua API de estoque
   private apiUrl = 'http://localhost:8080/estoque';
 
   constructor(private http: HttpClient) { }
@@ -41,6 +40,11 @@ export class EstoqueService {
   // PATCH /estoque/{id}/remover
   removerQuantidade(id: number, request: AlterarSaldoEstoqueRequest): Observable<Estoque> {
     return this.http.patch<Estoque>(`${this.apiUrl}/${id}/remover`, request);
+  }
+
+  // PATCH /estoque/{id}/alterar-minimo
+  alterarQuantidadeMinima(id: number, request: AlterarSaldoEstoqueRequest): Observable<Estoque> {
+    return this.http.patch<Estoque>(`${this.apiUrl}/${id}/alterar-minimo`, request);
   }
 
   // GET /estoque/busca/ativos?nome=...
