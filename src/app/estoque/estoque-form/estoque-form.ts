@@ -99,17 +99,16 @@ export class EstoqueFormComponent implements OnInit {
       : this.estoqueService.removerQuantidade(this.estoqueId, request);
       
     operacao.subscribe({
-      next: () => {
-        this.mensagemSucesso = `Saldo do produto "${this.estoqueItem?.produtoNome}" atualizado com sucesso!`;
-        this.ajusteForm.reset();
-        this.carregarDadosEstoque(this.estoqueId!); // Atualiza os dados
-        setTimeout(() => this.mensagemSucesso = null, 3000);
-      },
-      error: (err) => {
-        console.error('Erro ao ajustar saldo:', err);
-        this.mensagemErro = this.extrairMensagemErro(err);
-      }
-    });
+    next: () => {
+    this.mensagemSucesso = `Saldo do produto "${this.estoqueItem?.produtoNome}" atualizado com sucesso!`;
+    this.ajusteForm.reset();
+    this.carregarDadosEstoque(this.estoqueId!);
+    setTimeout(() => {
+      this.mensagemSucesso = null;
+      this.voltarParaLista(); // ← ADICIONAR
+    }, 3000);
+  }
+});
   }
 
   atualizarQuantidadeMinima(): void {
@@ -128,16 +127,15 @@ export class EstoqueFormComponent implements OnInit {
     }
 
     this.estoqueService.alterarQuantidadeMinima(this.estoqueId, request).subscribe({
-      next: () => {
-        this.mensagemSucesso = `Quantidade mínima do produto "${this.estoqueItem?.produtoNome}" atualizada com sucesso!`;
-        this.carregarDadosEstoque(this.estoqueId!);
-        setTimeout(() => this.mensagemSucesso = null, 3000);
-      },
-      error: (err) => {
-        console.error('Erro ao atualizar quantidade mínima:', err);
-        this.mensagemErro = this.extrairMensagemErro(err);
-      }
-    });
+  next: () => {
+    this.mensagemSucesso = `Quantidade mínima do produto "${this.estoqueItem?.produtoNome}" atualizada com sucesso!`;
+    this.carregarDadosEstoque(this.estoqueId!);
+    setTimeout(() => {
+      this.mensagemSucesso = null;
+      this.voltarParaLista(); // ← ADICIONAR
+    }, 3000);
+  }
+});
   }
 
   // Extrai mensagem de erro da resposta da API
