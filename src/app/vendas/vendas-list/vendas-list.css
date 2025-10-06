@@ -1,0 +1,73 @@
+/* Reutiliza estilos de produto-list */
+.container { padding: 20px; font-family: sans-serif; }
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+h1 { margin: 0; }
+
+/* Toolbar */
+.toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.tabs { display: flex; gap: 5px; border-bottom: 2px solid #ddd; }
+.tabs a { 
+  padding: 10px 15px; 
+  text-decoration: none; 
+  color: #333; 
+  border-radius: 4px 4px 0 0;
+  cursor: pointer;
+}
+.tabs a:hover { background-color: #f0f0f0; }
+.tabs a.active-tab { background-color: #007bff; color: white; font-weight: bold; }
+
+/* Tabela */
+table { 
+  width: 100%; 
+  border-collapse: collapse; 
+  margin-top: 20px; 
+  background-color: white; 
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
+}
+th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+th { background-color: #f2f2f2; font-weight: bold; }
+tr:nth-child(even) { background-color: #f9f9f9; }
+tr.clickable { cursor: pointer; }
+tr.clickable:hover { background-color: #e3f2fd; }
+
+/* Badges */
+.badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+.badge-aberta { background-color: #ffc107; color: #333; }
+.badge-finalizada { background-color: #28a745; color: white; }
+
+/* Botões */
+button { 
+  padding: 8px 12px; 
+  margin-right: 5px; 
+  border: none; 
+  cursor: pointer; 
+  border-radius: 4px; 
+  color: white; 
+  transition: opacity 0.2s;
+  font-weight: 500;
+}
+button:hover { opacity: 0.8; }
+button:disabled { background-color: #ccc; cursor: not-allowed; }
+.btn-add { background-color: #28a745; font-size: 1rem; }
+.btn-edit { background-color: #ffc107; color: #333; }
+.btn-delete { background-color: #dc3545; }
+td.actions { min-width: 180px; }
+
+/* Mensagens */
+.message { padding: 15px; margin-bottom: 15px; border-radius: 4px; text-align: center; }
+.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: #888;
+  font-size: 1.1rem;
+}

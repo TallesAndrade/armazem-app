@@ -1,4 +1,128 @@
-<div class="placeholder-container">
-  <h2>Página de Vendas</h2>
-  <p>Em desenvolvimento...</p>
+<div class="vendas-container">
+  <header class="vendas-header">
+    <h1>Painel de Vendas</h1>
+    <button class="btn-voltar" (click)="voltarParaLista()">← Voltar</button>
+  </header>
+
+  <div *ngIf="mensagemSucesso" class="message success">{{ mensagemSucesso }}</div>
+  <div *ngIf="mensagemErro" class="message error">{{ mensagemErro }}</div>
+
+  <main class="vendas-main">
+    <!-- Seção de Adicionar Itens - Esconde se finalizada -->
+    <section class="item-section" *ngIf="!vendaFinalizada">
+      <h2>Adicionar Produto à Venda</h2>
+      <form [formGroup]="itemForm" (ngSubmit)="adicionarItem()">
+
+        <!-- Campo de Busca -->
+        <div class="form-group autocomplete">
+          <label for="termoBusca">Buscar Produto</label>
+          <input id="termoBusca" type="text" formControlName="termoBusca" placeholder="Digite o nome do produto..."
+            autocomplete="off" />
+          <ul class="autocomplete-results" *ngIf="mostrarListaAutoComplete && (produtosFiltrados$ | async) as produtos">
+            <li *ngFor="let produto of produtos" (click)="selecionarProduto(produto)">
+              {{ produto.nome }} ({{ produto.ehPesavel ? (produto.precoKg | currency:'BRL') + '/Kg' :
+              (produto.precoUnidade | currency:'BRL') + '/Un' }})
+            </li>
+          </ul>
+        </div>
+
+        <!-- Detalhes do Item -->
+        <div class="item-details">
+          <div class="form-group">
+            <label for="quantidade">
+              Quantidade
+              <span *ngIf="itemForm.get('unidadeMedida')?.value === 'GRAMA'">(em gramas)</span>
+              <span *ngIf="itemForm.get('unidadeMedida')?.value === 'KILO'">(em kg)</span>
+              <span *ngIf="itemForm.get('unidadeMedida')?.value === 'UNIDADE'">(unidades)</span>
+            </label>
+            <input id="quantidade" type="number" formControlName="quantidade" placeholder="0.00" />
+          </div>
+          <div class="form-group">
+            <label for="unidadeMedida">Unidade</label>
+            <select id="unidadeMedida" formControlName="unidadeMedida">
+              <option *ngIf="produtoSelecionado?.ehPesavel" [value]="'GRAMA'">Gramas (g)</option>
+              <option *ngIf="produtoSelecionado?.ehPesavel" [value]="'KILO'">Quilos (kg)</option>
+              <option *ngIf="!produtoSelecionado?.ehPesavel" [value]="'UNIDADE'">Unidades</option>
+            </select>
+          </div>
+          <button type="submit" class="btn-add-item" [disabled]="itemForm.invalid">Adicionar</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Aviso de Venda Finalizada -->
+    <section class="item-section" *ngIf="vendaFinalizada">
+      <div class="message success">
+        <strong>✓ Venda Finalizada</strong> - Esta venda foi concluída e não pode ser editada.
+      </div>
+    </section>
+
+    <!-- Seção do Carrinho/Venda Atual -->
+    <section class="carrinho-section">
+      <h2>Itens da Venda #{{ vendaAtual?.id }}</h2>
+      <div class="carrinho-content">
+        <table *ngIf="vendaAtual?.produtosVenda?.length; else carrinhoVazio">
+          <thead>
+            <tr>
+              <th>Produto</th>
+              <th>Qtd.</th>
+              <th>Preço</th>
+              <th>Subtotal</th>
+              <th *ngIf="!vendaFinalizada">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of vendaAtual!.produtosVenda">
+              <td>{{ item.nomeProduto }}</td>
+              <td>
+                <ng-container *ngIf="item.unidadeMedida === 'GRAMA'">
+                  {{ ((item.quantidadeKg ?? 0) * 1000) | number:'1.0-0' }}g
+                </ng-container>
+                <ng-container *ngIf="item.unidadeMedida === 'KILO'">
+                  {{ (item.quantidadeKg ?? 0) | number:'1.0-2' }}kg
+                </ng-container>
+                <ng-container *ngIf="item.unidadeMedida === 'UNIDADE'">
+                  {{ item.quantidadeUnidades ?? 0 }}un
+                </ng-container>
+              </td>
+              <td>
+                <ng-container *ngIf="item.unidadeMedida === 'GRAMA'">
+                  {{ item.precoUnitario | currency:'BRL' }}/kg
+                </ng-container>
+                <ng-container *ngIf="item.unidadeMedida === 'KILO'">
+                  {{ item.precoUnitario | currency:'BRL' }}/kg
+                </ng-container>
+                <ng-container *ngIf="item.unidadeMedida === 'UNIDADE'">
+                  {{ item.precoUnitario | currency:'BRL' }}/un
+                </ng-container>
+              </td>
+              <td>{{ item.precoTotal | currency:'BRL' }}</td>
+              <td *ngIf="!vendaFinalizada">
+                <button class="btn-remove" (click)="removerItem(item.id)">🗑️</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <ng-template #carrinhoVazio>
+          <div class="carrinho-vazio">
+            <p>Nenhum item adicionado à venda ainda.</p>
+          </div>
+        </ng-template>
+      </div>
+
+      <footer class="carrinho-footer">
+        <div class="total">
+          <span>VALOR TOTAL</span>
+          <strong>{{ vendaAtual?.valorTotal | currency:'BRL' }}</strong>
+        </div>
+        <button class="btn-finalizar" 
+                (click)="finalizarVenda()" 
+                *ngIf="!vendaFinalizada"
+                [disabled]="!vendaAtual?.produtosVenda?.length">
+          Finalizar Venda
+        </button>
+      </footer>
+    </section>
+  </main>
 </div>
