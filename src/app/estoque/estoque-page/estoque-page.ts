@@ -1,111 +1,109 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { Observable } from 'rxjs';
-import { debounceTime, distinctUntilChanged, startWith, switchMap } from 'rxjs/operators';
-
-import { Estoque } from '../estoque.model';
+import { Router, RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { EstoqueService } from '../estoque.service';
+import { Estoque } from '../estoque.model';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   selector: 'app-estoque-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, ReactiveFormsModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './estoque-page.html',
   styleUrls: ['./estoque-page.css']
 })
 export class EstoquePageComponent implements OnInit {
   estoques: Estoque[] = [];
-  mensagemErro: string | null = null;
+  termoBusca: string = '';
+  loading: boolean = false;
   
-  activeFilter: string = 'ativos';
-  pageTitle: string = 'Estoque de Produtos Ativos';
-  
-  searchControl = new FormControl('');
+  private searchSubject = new Subject<string>();
 
   constructor(
     private estoqueService: EstoqueService,
-    private route: ActivatedRoute,
-    private router: Router // Adicionar Router
+    private router: Router
   ) {}
 
   ngOnInit(): void {
-    // Detecta o filtro pela URL atual (igual ao produto-list)
-    const url = this.router.url;
-    if (url.includes('/estoque/ativos')) {
-      this.activeFilter = 'ativos';
-    } else if (url.includes('/estoque/inativos')) {
-      this.activeFilter = 'inativos';
-    } else if (url.includes('/estoque/todos')) {
-      this.activeFilter = 'todos';
-    }
-
-    this.atualizarTitulo();
-
-    // Configura a busca reativa
-    this.searchControl.valueChanges.pipe(
-      startWith(''),
+    this.carregarEstoques();
+    
+    this.searchSubject.pipe(
       debounceTime(300),
-      distinctUntilChanged(),
-      switchMap(searchTerm => this.carregarEstoques(searchTerm || ''))
-    ).subscribe({
-      next: (dados) => {
-        this.estoques = dados;
-        this.mensagemErro = null;
-      },
-      error: (erro) => this.handleError(erro)
+      distinctUntilChanged()
+    ).subscribe(() => {
+      this.buscarEstoques();
     });
   }
 
-  carregarEstoques(searchTerm: string): Observable<Estoque[]> {
-    this.mensagemErro = null;
-
-    if (searchTerm) {
-      switch (this.activeFilter) {
-        case 'todos': return this.estoqueService.searchTodosEstoques(searchTerm);
-        case 'inativos': return this.estoqueService.searchEstoquesInativos(searchTerm);
-        default: return this.estoqueService.searchEstoquesAtivos(searchTerm);
-      }
+  carregarEstoques(): void {
+    this.loading = true;
+    const path = this.router.url;
+    
+    let observable;
+    if (path.includes('ativos')) {
+      observable = this.estoqueService.getEstoquesAtivos();
+    } else if (path.includes('inativos')) {
+      observable = this.estoqueService.getEstoquesInativos();
     } else {
-      switch (this.activeFilter) {
-        case 'todos': return this.estoqueService.getTodosEstoques();
-        case 'inativos': return this.estoqueService.getEstoquesInativos();
-        default: return this.estoqueService.getEstoquesAtivos();
+      observable = this.estoqueService.getTodosEstoques();
+    }
+
+    observable.subscribe({
+      next: (estoques) => {
+        this.estoques = estoques;
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Erro ao carregar estoques:', err);
+        this.loading = false;
       }
+    });
+  }
+
+  onSearchChange(term: string): void {
+    this.searchSubject.next(term);
+  }
+
+  buscarEstoques(): void {
+    if (!this.termoBusca || this.termoBusca.trim() === '') {
+      this.carregarEstoques();
+      return;
     }
-  }
 
-  atualizarTitulo(): void {
-    switch (this.activeFilter) {
-      case 'todos': this.pageTitle = 'Todo o Estoque'; break;
-      case 'inativos': this.pageTitle = 'Estoque de Produtos Inativos'; break;
-      default: this.pageTitle = 'Estoque de Produtos Ativos'; break;
-    }
-  }
-
-  private handleError(erro: any): void {
-    console.error('Erro ao buscar estoque:', erro);
-    this.mensagemErro = 'Não foi possível carregar os dados do estoque. Verifique a API.';
-  }
-
-  // Função para determinar o status do estoque
- getStatusEstoque(item: Estoque): string {
-    // Usa a quantidade correta baseada no tipo do produto
-    let quantidade: number;
+    this.loading = true;
+    const path = this.router.url;
     
-    if (item.ehPesavel) {
-      // Produto pesável: usa quantidadeKg
-      quantidade = item.quantidadeKg ?? 0;
+    let observable;
+    if (path.includes('ativos')) {
+      observable = this.estoqueService.searchEstoquesAtivos(this.termoBusca);
+    } else if (path.includes('inativos')) {
+      observable = this.estoqueService.searchEstoquesInativos(this.termoBusca);
     } else {
-      // Produto por unidade: usa quantidadeUnidades
-      quantidade = item.quantidadeUnidades ?? 0;
+      observable = this.estoqueService.searchTodosEstoques(this.termoBusca);
     }
-    
-    const minimo = item.quantidadeMinima ?? 0;
-    
-    if (quantidade <= 0) return 'esgotado';
-    if (minimo > 0 && quantidade <= minimo) return 'baixo';
-    return 'ok';
+
+    observable.subscribe({
+      next: (estoques) => {
+        this.estoques = estoques;
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Erro ao buscar estoques:', err);
+        this.loading = false;
+      }
+    });
+  }
+
+  isEstoqueBaixo(estoque: Estoque): boolean {
+    if (estoque.ehPesavel) {
+      return (estoque.quantidadeKg ?? 0) < (estoque.quantidadeMinima ?? 0);
+    }
+    return (estoque.quantidadeUnidades ?? 0) < (estoque.quantidadeMinima ?? 0);
+  }
+
+  ajustarEstoque(id: number): void {
+    this.router.navigate(['/estoque/ajustar', id]);
   }
 }

@@ -1,10 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
-
-import { ProdutoService, ProdutoRequest } from '../produto.service';
-import { UnidadeMedida } from '../produto.model';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ProdutoService } from '../produto.service';
 import { Produto } from '../produto.model';
 
 @Component({
@@ -15,14 +13,11 @@ import { Produto } from '../produto.model';
   styleUrls: ['./produto-form.css']
 })
 export class ProdutoFormComponent implements OnInit {
-
   produtoForm: FormGroup;
-  unidadesMedida = Object.values(UnidadeMedida);
-  mensagemSucesso: string | null = null;
-  mensagemErro: string | null = null;
-  
-  isEditMode = false;
+  isEditMode: boolean = false;
   produtoId: number | null = null;
+  mensagemErro: string | null = null;
+  loading: boolean = false;
 
   constructor(
     private fb: FormBuilder,
@@ -32,137 +27,95 @@ export class ProdutoFormComponent implements OnInit {
   ) {
     this.produtoForm = this.fb.group({
       nome: ['', Validators.required],
-      unidadeMedida: [null, Validators.required],
-      precoKg: [null],
-      precoUnidade: [null],
+      unidadeMedida: ['', Validators.required],
+      precoKg: [0, [Validators.min(0)]],
+      precoUnidade: [0, [Validators.min(0)]],
       dataValidade: ['', Validators.required],
-      ehPesavel: [false] // Removido do template, mas mantido para compatibilidade
+      ehPesavel: [false]
     });
   }
 
   ngOnInit(): void {
-    // Verificamos se há um 'id' nos parâmetros da rota
-    this.route.params.subscribe(params => {
-      if (params['id']) {
-        this.isEditMode = true;
-        this.produtoId = +params['id'];
-        this.carregarDadosProduto(this.produtoId);
-      }
-    });
-
-    // Escuta mudanças na unidade de medida para aplicar lógica reativa
-    this.produtoForm.get('unidadeMedida')?.valueChanges.subscribe(unidade => {
-      this.aplicarLogicaUnidadeMedida(unidade);
-    });
-  }
-
-  aplicarLogicaUnidadeMedida(unidade: UnidadeMedida): void {
-    if (!unidade) return;
-
-    const precoKgControl = this.produtoForm.get('precoKg');
-    const precoUnidadeControl = this.produtoForm.get('precoUnidade');
-    const ehPesavelControl = this.produtoForm.get('ehPesavel');
-
-    if (unidade === UnidadeMedida.GRAMA || unidade === UnidadeMedida.KILO) {
-      // Produto pesável
-      ehPesavelControl?.setValue(true);
-      precoUnidadeControl?.setValue(0.0);
-      precoUnidadeControl?.disable();
-      precoKgControl?.enable();
-      
-      // Adiciona validação obrigatória para precoKg
-      precoKgControl?.setValidators([Validators.required, Validators.min(0.01)]);
-      precoUnidadeControl?.clearValidators();
-    } else if (unidade === UnidadeMedida.UNIDADE) {
-      // Produto por unidade
-      ehPesavelControl?.setValue(false);
-      precoKgControl?.setValue(0.0);
-      precoKgControl?.disable();
-      precoUnidadeControl?.enable();
-      
-      // Adiciona validação obrigatória para precoUnidade
-      precoUnidadeControl?.setValidators([Validators.required, Validators.min(0.01)]);
-      precoKgControl?.clearValidators();
+    const id = this.route.snapshot.paramMap.get('id');
+    
+    if (id) {
+      this.isEditMode = true;
+      this.produtoId = +id;
+      this.carregarProduto();
     }
 
-    // Atualiza as validações
-    precoKgControl?.updateValueAndValidity();
-    precoUnidadeControl?.updateValueAndValidity();
+    // Validação condicional baseada em ehPesavel
+    this.produtoForm.get('ehPesavel')?.valueChanges.subscribe(ehPesavel => {
+      this.atualizarValidacoes(ehPesavel);
+    });
   }
 
-  carregarDadosProduto(id: number): void {
-    this.produtoService.getProdutoById(id).subscribe({
-      next: (produto) => {
-        const dataFormatada = new Date(produto.dataValidade).toISOString().split('T')[0];
-        
-        this.produtoForm.patchValue({
-          ...produto,
-          dataValidade: dataFormatada
-        });
+  atualizarValidacoes(ehPesavel: boolean): void {
+    const precoKg = this.produtoForm.get('precoKg');
+    const precoUnidade = this.produtoForm.get('precoUnidade');
 
-        this.aplicarLogicaUnidadeMedida(produto.unidadeMedida);
+    if (ehPesavel) {
+      precoKg?.setValidators([Validators.required, Validators.min(0.01)]);
+      precoUnidade?.clearValidators();
+      precoUnidade?.setValue(0);
+    } else {
+      precoUnidade?.setValidators([Validators.required, Validators.min(0.01)]);
+      precoKg?.clearValidators();
+      precoKg?.setValue(0);
+    }
+
+    precoKg?.updateValueAndValidity();
+    precoUnidade?.updateValueAndValidity();
+  }
+
+  carregarProduto(): void {
+    if (!this.produtoId) return;
+
+    this.produtoService.getProdutoById(this.produtoId).subscribe({
+      next: (produto) => {
+        this.produtoForm.patchValue({
+          nome: produto.nome,
+          unidadeMedida: produto.unidadeMedida,
+          precoKg: produto.precoKg,
+          precoUnidade: produto.precoUnidade,
+          dataValidade: produto.dataValidade,
+          ehPesavel: produto.ehPesavel
+        });
       },
       error: (err) => {
-        this.mensagemErro = this.extrairMensagemErro(err);
+        this.mensagemErro = 'Não foi possível carregar o produto.';
         console.error(err);
       }
     });
   }
 
-  onSubmit(): void {
+  salvar(): void {
     if (this.produtoForm.invalid) {
-      this.produtoForm.markAllAsTouched();
+      this.mensagemErro = 'Por favor, preencha todos os campos obrigatórios.';
       return;
     }
 
-    const formValue = { ...this.produtoForm.value };
-    
-    if (this.produtoForm.get('precoKg')?.disabled) {
-      formValue.precoKg = this.produtoForm.get('precoKg')?.value;
-    }
-    if (this.produtoForm.get('precoUnidade')?.disabled) {
-      formValue.precoUnidade = this.produtoForm.get('precoUnidade')?.value;
-    }
+    this.loading = true;
+    const request: Produto = this.produtoForm.value;
 
-    const request: ProdutoRequest = formValue;
+    const observable = this.isEditMode && this.produtoId
+      ? this.produtoService.updateProduto(this.produtoId, request)
+      : this.produtoService.createProduto(request);
 
-    if (this.isEditMode && this.produtoId) {
-      this.produtoService.updateProduto(this.produtoId, request).subscribe({
-        next: () => {
-          this.mensagemSucesso = 'Produto atualizado com sucesso! Redirecionando...';
-          setTimeout(() => this.router.navigate(['/']), 2000);
-        },
-        error: (err) => {
-          this.mensagemErro = this.extrairMensagemErro(err);
-          console.error(err);
-        }
-      });
-    } else {
-      this.produtoService.createProduto(request).subscribe({
-        next: () => {
-          this.mensagemSucesso = 'Produto criado com sucesso! Redirecionando...';
-          setTimeout(() => this.router.navigate(['/']), 2000);
-        },
-        error: (err) => {
-          this.mensagemErro = this.extrairMensagemErro(err);
-          console.error(err);
-        }
-      });
-    }
+    observable.subscribe({
+      next: () => {
+        this.loading = false;
+        this.router.navigate(['/produtos/ativos']);
+      },
+      error: (err) => {
+        this.loading = false;
+        this.mensagemErro = err.error?.message || 'Não foi possível salvar o produto.';
+        console.error(err);
+      }
+    });
   }
 
-  voltarParaLista(): void {
-    this.router.navigate(['/']);
-  }
-
-  private extrairMensagemErro(err: any): string {
-    if (err.error?.message) {
-      return err.error.message;
-    } else if (err.message) {
-      return err.message;
-    } else if (err.error?.error) {
-      return `Erro ${err.error.status}: ${err.error.error}`;
-    }
-    return 'Ocorreu um erro inesperado. Tente novamente.';
+  cancelar(): void {
+    this.router.navigate(['/produtos/ativos']);
   }
 }

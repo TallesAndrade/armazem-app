@@ -1,108 +1,127 @@
-.form-container {
-  max-width: 600px;
-  margin: 20px auto;
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-family: sans-serif;
-  background-color: #f9f9f9;
+.produto-form-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
 }
 
-h2 {
-  text-align: center;
-  margin-bottom: 20px;
+.produto-form-container .form-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  box-shadow: var(--shadow-lg);
 }
 
-.form-group, .form-group-checkbox {
-  margin-bottom: 15px;
+.produto-form-container .form-header {
+  margin-bottom: 2rem;
 }
 
-label {
+.produto-form-container .form-header h1 {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.produto-form-container .form-group {
+  margin-bottom: 1.5rem;
+}
+
+.produto-form-container .form-group label {
   display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--gray-700);
 }
 
-input, select {
+.produto-form-container .form-group input,
+.produto-form-container .form-group select {
   width: 100%;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  box-sizing: border-box;
+  padding: 0.875rem;
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius);
+  font-size: 1rem;
+  transition: all 0.2s;
 }
 
-.form-group-checkbox {
+.produto-form-container .form-group input:focus,
+.produto-form-container .form-group select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.produto-form-container .form-group input:disabled {
+  background: var(--gray-100);
+  cursor: not-allowed;
+}
+
+.produto-form-container .checkbox-group {
   display: flex;
   align-items: center;
+  gap: 0.75rem;
 }
 
-.form-group-checkbox input {
-  margin-right: 10px;
+.produto-form-container .checkbox-group input[type="checkbox"] {
   width: auto;
-}
-
-.form-actions {
-  text-align: right;
-  margin-top: 20px;
-}
-
-button {
-  padding: 10px 15px;
-  border: none;
-  border-radius: 4px;
+  height: 20px;
+  width: 20px;
   cursor: pointer;
-  margin-left: 10px;
+}
+
+.produto-form-container .form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.produto-form-container .btn-submit {
+  flex: 1;
+  padding: 1rem;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.produto-form-container .btn-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5);
+}
+
+.produto-form-container .btn-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.produto-form-container .btn-cancel {
+  padding: 1rem 2rem;
+  background: var(--gray-200);
+  color: var(--gray-700);
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.produto-form-container .btn-cancel:hover {
+  background: var(--gray-700);
   color: white;
 }
 
-button[type="submit"] {
-  background-color: #28a745;
+.produto-form-container .message {
+  padding: 1rem 1.5rem;
+  border-radius: var(--radius);
+  margin-bottom: 1.5rem;
+  font-weight: 500;
 }
 
-button[type="submit"]:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-
-button[type="button"] {
-  background-color: #6c757d;
-}
-
-.message {
-  padding: 10px;
-  margin-bottom: 15px;
-  border-radius: 4px;
-  text-align: center;
-}
-
-.success {
-  background-color: #d4edda;
-  color: #155724;
-}
-
-.error {
-  background-color: #f8d7da;
-  color: #721c24;
-}
-
-.form-help {
-  display: block;
-  margin-top: 5px;
-  color: #6c757d;
-  font-size: 0.875rem;
-}
-
-.field-status {
-  margin-top: 5px;
-}
-
-.field-status small {
-  color: #6c757d;
-  font-style: italic;
-}
-
-input:disabled {
-  background-color: #f8f9fa;
-  border-color: #dee2e6;
-  cursor: not-allowed;
+.produto-form-container .message.error {
+  background: #fee2e2;
+  color: #991b1b;
+  border-left: 4px solid var(--danger);
 }

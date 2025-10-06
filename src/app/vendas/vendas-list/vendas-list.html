@@ -1,4 +1,4 @@
-<div class="container">
+<div class="vendas-list-container">
   <div class="page-header">
     <h1>Vendas</h1>
     <button class="btn-add" (click)="novaVenda()">+ Nova Venda</button>
@@ -15,37 +15,39 @@
     </nav>
   </div>
 
-  <table *ngIf="vendas.length > 0; else semVendas">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Data</th>
-        <th>Qtd. Itens</th>
-        <th>Valor Total</th>
-        <th>Status</th>
-        <th>Ações</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let venda of vendas" (click)="editarVenda(venda.id)" [class.clickable]="venda.status === 'ABERTA'">
-        <td>{{ venda.id }}</td>
-        <td>{{ venda.dataVenda | date:'dd/MM/yyyy' }}</td>
-        <td>{{ venda.produtosVenda.length }}</td>
-        <td>{{ venda.valorTotal | currency:'BRL' }}</td>
-        <td>
-          <span class="badge" [class.badge-aberta]="venda.status === 'ABERTA'" [class.badge-finalizada]="venda.status === 'FINALIZADA'">
-            {{ venda.status === 'ABERTA' ? 'Aberta' : 'Finalizada' }}
-          </span>
-        </td>
-        <td class="actions">
-          <button class="btn-edit" (click)="editarVenda(venda.id)" *ngIf="venda.status === 'ABERTA'">Editar</button>
-          <button class="btn-delete" (click)="deletarVenda(venda.id, $event)" *ngIf="venda.status === 'ABERTA'">Cancelar</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="table-container">
+    <table *ngIf="vendas.length > 0; else semVendas">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Data</th>
+          <th>Qtd. Itens</th>
+          <th>Valor Total</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let venda of vendas">
+          <td>{{ venda.id }}</td>
+          <td>{{ venda.dataVenda | date:'dd/MM/yyyy' }}</td>
+          <td>{{ venda.produtosVenda.length }}</td>
+          <td>{{ venda.valorTotal | currency:'BRL' }}</td>
+          <td>
+            <span class="badge" [class.badge-aberta]="venda.status === 'ABERTA'" [class.badge-finalizada]="venda.status === 'FINALIZADA'">
+              {{ venda.status === 'ABERTA' ? 'Aberta' : 'Finalizada' }}
+            </span>
+          </td>
+          <td class="actions">
+            <button class="btn-edit" (click)="editarVenda(venda.id)" *ngIf="venda.status === 'ABERTA'">Editar</button>
+            <button class="btn-delete" (click)="cancelarVenda(venda.id, $event)" *ngIf="venda.status === 'ABERTA'">Cancelar</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
 
-  <ng-template #semVendas>
-    <p class="empty-state">Nenhuma venda encontrada.</p>
-  </ng-template>
+    <ng-template #semVendas>
+      <p class="empty-state">Nenhuma venda encontrada.</p>
+    </ng-template>
+  </div>
 </div>

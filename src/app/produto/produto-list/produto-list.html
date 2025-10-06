@@ -1,62 +1,70 @@
-<div class="container">
+<div class="produto-list-container">
   <div class="page-header">
-    <h1>{{ pageTitle }}</h1>
-    <button class="btn-add" routerLink="/produtos/novo">Adicionar Produto</button>
+    <h1>Produtos</h1>
+    <button class="btn-add" (click)="navigateToForm()">+ Adicionar Produto</button>
   </div>
 
-  <div *ngIf="mensagemSucesso" class="success-message">{{ mensagemSucesso }}</div>
-  <div *ngIf="mensagemErro" class="error-message">{{ mensagemErro }}</div>
+  <div *ngIf="mensagemSucesso" class="message success">{{ mensagemSucesso }}</div>
+  <div *ngIf="mensagemErro" class="message error">{{ mensagemErro }}</div>
 
   <div class="toolbar">
-    <nav class="tabs">
-      <a routerLink="/produtos/ativos" routerLinkActive="active-tab">Ativos</a>
-      <a routerLink="/produtos/inativos" routerLinkActive="active-tab">Inativos</a>
-      <a routerLink="/produtos/todos" routerLinkActive="active-tab">Todos</a>
-    </nav>
-    <div class="search-bar">
+    <div class="toolbar-top">
       <input 
         type="text" 
-        placeholder="Buscar por nome..." 
-        [formControl]="searchControl">
+        class="search-bar" 
+        placeholder="Buscar por nome do produto..." 
+        [(ngModel)]="termoBusca"
+        (ngModelChange)="onSearchChange($event)"
+      />
     </div>
+
+    <nav class="tabs">
+      <a [routerLink]="['/produtos/ativos']" routerLinkActive="active-tab">Ativos</a>
+      <a [routerLink]="['/produtos/inativos']" routerLinkActive="active-tab">Inativos</a>
+      <a [routerLink]="['/produtos/todos']" routerLinkActive="active-tab">Todos</a>
+    </nav>
   </div>
 
-  <table *ngIf="!mensagemErro && produtos.length > 0">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Nome</th>
-        <th>Preço (Unidade)</th>
-        <th>Preço (KG)</th>
-        <th>Validade</th>
-        <th *ngIf="activeFilter === 'todos'">Status</th>
-        <th>Ações</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let produto of produtos">
-        <td>{{ produto.id }}</td>
-        <td>{{ produto.nome }}</td>
-        <td>{{ produto.precoUnidade | currency:'BRL' }}</td>
-        <td>{{ produto.precoKg | currency:'BRL' }}</td>
-        <td>{{ produto.dataValidade | date:'dd/MM/yyyy' }}</td>
-        <td *ngIf="activeFilter === 'todos'">
-          <span [class.active]="produto.ativo" [class.inactive]="!produto.ativo">
-            {{ produto.ativo ? 'Ativo' : 'Inativo' }}
-          </span>
-        </td>
-        <td class="actions">
-          <ng-container *ngIf="produto.ativo">
-            <button class="btn-edit" [routerLink]="['/produtos/editar', produto.id]">Editar</button>
-            <button class="btn-delete" (click)="excluirProduto(produto.id, produto.nome)">Desativar</button>
-          </ng-container>
-          <ng-container *ngIf="!produto.ativo">
-            <button class="btn-activate" (click)="reativarProduto(produto.id, produto.nome)">Reativar</button>
-          </ng-container>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="table-container" *ngIf="!loading; else loadingTemplate">
+    <table *ngIf="produtos.length > 0; else semProdutos">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nome</th>
+          <th>Preço (Unidade)</th>
+          <th>Preço (KG)</th>
+          <th>Validade</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let produto of produtos">
+          <td>{{ produto.id }}</td>
+          <td>{{ produto.nome }}</td>
+          <td>{{ produto.precoUnidade | currency:'BRL' }}</td>
+          <td>{{ produto.precoKg | currency:'BRL' }}</td>
+          <td>{{ produto.dataValidade | date:'dd/MM/yyyy' }}</td>
+          <td>
+            <span class="badge" [class.badge-ativo]="produto.ativo" [class.badge-inativo]="!produto.ativo">
+              {{ produto.ativo ? 'Ativo' : 'Inativo' }}
+            </span>
+          </td>
+          <td class="actions">
+            <button class="btn-edit" (click)="editarProduto(produto.id)" *ngIf="produto.ativo">Editar</button>
+            <button class="btn-delete" (click)="desativarProduto(produto.id)" *ngIf="produto.ativo">Desativar</button>
+            <button class="btn-activate" (click)="ativarProduto(produto.id)" *ngIf="!produto.ativo">Ativar</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
 
-  <p *ngIf="!mensagemErro && produtos.length === 0">Nenhum produto encontrado.</p>
+    <ng-template #semProdutos>
+      <p class="empty-state">Nenhum produto encontrado.</p>
+    </ng-template>
+  </div>
+
+  <ng-template #loadingTemplate>
+    <p class="empty-state">Carregando produtos...</p>
+  </ng-template>
 </div>

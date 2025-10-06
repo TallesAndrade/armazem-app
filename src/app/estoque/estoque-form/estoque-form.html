@@ -1,82 +1,60 @@
-<!-- Fundo escurecido do modal -->
-<div class="modal-backdrop" (click)="voltarParaLista()"></div>
-
-<!-- Conteúdo do formulário -->
-<div class="form-container modal-content">
-  <div *ngIf="estoqueItem">
-    <h2>Ajustar: {{ estoqueItem.produtoNome }}</h2>
-    <div class="current-stock">
-      <span *ngIf="estoqueItem.ehPesavel">
-        Estoque Atual: <strong>{{ estoqueItem.quantidadeKg ?? 0 | number:'1.2-2' }} Kg</strong>
-        | Mínimo: <strong>{{ estoqueItem.quantidadeMinima ?? 0 | number:'1.2-2' }} Kg</strong>
-      </span>
-      <span *ngIf="!estoqueItem.ehPesavel">
-        Estoque Atual: <strong>{{ estoqueItem.quantidadeUnidades ?? 0 }} Un</strong>
-        | Mínimo: <strong>{{ estoqueItem.quantidadeMinima ?? 0 | number:'1.0-0' }} Un</strong>
-      </span>
-    </div>
-  </div>
-  <h2 *ngIf="!estoqueItem && !mensagemErro">Carregando...</h2>
-  
-  <!-- Abas para selecionar a operação -->
-  <div class="tabs">
-    <button [class.active-tab]="modo === 'adicionar'" (click)="modo = 'adicionar'; onModoChange()">Entrada</button>
-    <button [class.active-tab]="modo === 'remover'" (click)="modo = 'remover'; onModoChange()">Saída</button>
-    <button [class.active-tab]="modo === 'minimo'" (click)="modo = 'minimo'; onModoChange()">Qtd. Mínima</button>
-  </div>
-
-  <div *ngIf="mensagemSucesso" class="message success">{{ mensagemSucesso }}</div>
-  <div *ngIf="mensagemErro" class="message error">{{ mensagemErro }}</div>
-
-  <!-- Formulário de Ajuste de Saldo -->
-  <form [formGroup]="ajusteForm" (ngSubmit)="onSubmit()" *ngIf="estoqueItem && modo !== 'minimo'">
-    <!-- Campo KG - só aparece se produto for pesável -->
-    <div class="form-group" *ngIf="estoqueItem.ehPesavel">
-      <label for="quantidadeKg">{{ modo === 'adicionar' ? 'Quantidade a Adicionar (Kg)' : 'Quantidade a Remover (Kg)' }}</label>
-      <input id="quantidadeKg" formControlName="quantidadeKg" type="number" step="0.01" placeholder="0.00">
+<div class="estoque-form-container">
+  <div class="form-card">
+    <div class="form-header">
+      <h1>Ajustar Estoque</h1>
     </div>
 
-    <!-- Campo Unidades - só aparece se produto NÃO for pesável -->
-    <div class="form-group" *ngIf="!estoqueItem.ehPesavel">
-      <label for="quantidadeUnidades">{{ modo === 'adicionar' ? 'Quantidade a Adicionar (Un)' : 'Quantidade a Remover (Un)' }}</label>
-      <input id="quantidadeUnidades" formControlName="quantidadeUnidades" type="number" placeholder="0">
+    <div *ngIf="mensagemErro" class="message error">{{ mensagemErro }}</div>
+
+    <div class="produto-info" *ngIf="estoque">
+      <h3>{{ estoque.produtoNome }}</h3>
+      <p><strong>Estoque Atual (Kg):</strong> {{ estoque.quantidadeKg }}</p>
+      <p><strong>Estoque Atual (Un):</strong> {{ estoque.quantidadeUnidades }}</p>
+      <p><strong>Estoque Mínimo:</strong> {{ estoque.quantidadeMinima }}</p>
     </div>
 
-    <div class="form-actions">
-      <button type="submit" [disabled]="ajusteForm.invalid || !estoqueItem.ativo">
-        {{ modo === 'adicionar' ? 'Confirmar Entrada' : 'Confirmar Saída' }}
-      </button>
-      <button type="button" (click)="voltarParaLista()">Cancelar</button>
-    </div>
-  </form>
+    <form [formGroup]="estoqueForm" (ngSubmit)="salvar()">
+      <div class="form-group">
+        <label for="operacao">Operação</label>
+        <select id="operacao" formControlName="operacao">
+          <option value="adicionar">Adicionar ao Estoque</option>
+          <option value="remover">Remover do Estoque</option>
+          <option value="alterar-minimo">Alterar Estoque Mínimo</option>
+        </select>
+      </div>
 
-  <!-- Formulário de Quantidade Mínima -->
-  <form [formGroup]="quantidadeMinimaForm" (ngSubmit)="onSubmit()" *ngIf="estoqueItem && modo === 'minimo'">
-    <div class="form-group">
-      <label for="quantidadeMinima">
-        {{ estoqueItem.ehPesavel ? 'Quantidade Mínima (Kg)' : 'Quantidade Mínima (Unidades)' }}
-      </label>
-      <input 
-        id="quantidadeMinima" 
-        formControlName="quantidadeMinima" 
-        type="number" 
-        [step]="estoqueItem.ehPesavel ? '0.01' : '1'"
-        [placeholder]="estoqueItem.ehPesavel ? '0.00' : '0'">
-      <small class="form-help">
-        Define o limite mínimo para alertas de estoque baixo.
-      </small>
-    </div>
+      <!-- Campos para Adicionar/Remover -->
+      <ng-container *ngIf="estoqueForm.get('operacao')?.value !== 'alterar-minimo'">
+        <div class="form-group" *ngIf="estoque?.ehPesavel">
+          <label for="quantidadeKg">Quantidade (Kg)</label>
+          <input id="quantidadeKg" type="number" formControlName="quantidadeKg" placeholder="0.00" step="0.01" />
+        </div>
 
-    <div class="form-actions">
-      <button type="submit" [disabled]="quantidadeMinimaForm.invalid || !estoqueItem.ativo">
-        Atualizar Quantidade Mínima
-      </button>
-      <button type="button" (click)="voltarParaLista()">Cancelar</button>
-    </div>
-  </form>
+        <div class="form-group" *ngIf="!estoque?.ehPesavel">
+          <label for="quantidadeUnidades">Quantidade (Unidades)</label>
+          <input id="quantidadeUnidades" type="number" formControlName="quantidadeUnidades" placeholder="0" />
+        </div>
+      </ng-container>
 
-  <!-- Aviso se estoque estiver inativo -->
-  <div *ngIf="estoqueItem && !estoqueItem.ativo" class="message error">
-    Este estoque está inativo e não pode ser alterado.
+      <!-- Campo para Alterar Mínimo -->
+      <ng-container *ngIf="estoqueForm.get('operacao')?.value === 'alterar-minimo'">
+        <div class="form-group" *ngIf="estoque?.ehPesavel">
+          <label for="novoMinimo">Novo Estoque Mínimo (Kg)</label>
+          <input id="novoMinimo" type="number" formControlName="quantidadeKg" placeholder="0.00" step="0.01" />
+        </div>
+
+        <div class="form-group" *ngIf="!estoque?.ehPesavel">
+          <label for="novoMinimo">Novo Estoque Mínimo (Unidades)</label>
+          <input id="novoMinimo" type="number" formControlName="quantidadeUnidades" placeholder="0" />
+        </div>
+      </ng-container>
+
+      <div class="form-actions">
+        <button type="submit" class="btn-submit" [disabled]="estoqueForm.invalid || loading">
+          {{ loading ? 'Processando...' : 'Confirmar' }}
+        </button>
+        <button type="button" class="btn-cancel" (click)="cancelar()">Cancelar</button>
+      </div>
+    </form>
   </div>
 </div>

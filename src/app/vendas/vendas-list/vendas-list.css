@@ -1,73 +1,189 @@
-/* Reutiliza estilos de produto-list */
-.container { padding: 20px; font-family: sans-serif; }
-.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-h1 { margin: 0; }
+.vendas-list-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
 
-/* Toolbar */
-.toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.tabs { display: flex; gap: 5px; border-bottom: 2px solid #ddd; }
-.tabs a { 
-  padding: 10px 15px; 
-  text-decoration: none; 
-  color: #333; 
-  border-radius: 4px 4px 0 0;
+.vendas-list-container .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+.vendas-list-container .page-header h1 {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.vendas-list-container .btn-add {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, var(--secondary), var(--secondary-dark));
+  color: var(--gray-900);
+  border: none;
+  border-radius: var(--radius);
   cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(132, 250, 176, 0.3);
 }
-.tabs a:hover { background-color: #f0f0f0; }
-.tabs a.active-tab { background-color: #007bff; color: white; font-weight: bold; }
 
-/* Tabela */
-table { 
-  width: 100%; 
-  border-collapse: collapse; 
-  margin-top: 20px; 
-  background-color: white; 
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
+.vendas-list-container .btn-add:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(132, 250, 176, 0.5);
 }
-th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-th { background-color: #f2f2f2; font-weight: bold; }
-tr:nth-child(even) { background-color: #f9f9f9; }
-tr.clickable { cursor: pointer; }
-tr.clickable:hover { background-color: #e3f2fd; }
 
-/* Badges */
-.badge {
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 0.85rem;
-  font-weight: bold;
-  text-transform: uppercase;
+.vendas-list-container .toolbar {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 1rem 1.5rem;
+  border-radius: var(--radius-lg);
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow);
 }
-.badge-aberta { background-color: #ffc107; color: #333; }
-.badge-finalizada { background-color: #28a745; color: white; }
 
-/* Botões */
-button { 
-  padding: 8px 12px; 
-  margin-right: 5px; 
-  border: none; 
-  cursor: pointer; 
-  border-radius: 4px; 
-  color: white; 
-  transition: opacity 0.2s;
+.vendas-list-container .tabs {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 2px solid var(--gray-200);
+}
+
+.vendas-list-container .tabs a {
+  padding: 0.75rem 1.25rem;
+  text-decoration: none;
+  color: var(--gray-700);
+  border-radius: var(--radius) var(--radius) 0 0;
+  cursor: pointer;
+  transition: all 0.2s;
   font-weight: 500;
 }
-button:hover { opacity: 0.8; }
-button:disabled { background-color: #ccc; cursor: not-allowed; }
-.btn-add { background-color: #28a745; font-size: 1rem; }
-.btn-edit { background-color: #ffc107; color: #333; }
-.btn-delete { background-color: #dc3545; }
-td.actions { min-width: 180px; }
 
-/* Mensagens */
-.message { padding: 15px; margin-bottom: 15px; border-radius: 4px; text-align: center; }
-.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+.vendas-list-container .tabs a:hover {
+  background: var(--gray-100);
+}
 
-/* Empty state */
-.empty-state {
+.vendas-list-container .tabs a.active-tab {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white;
+}
+
+.vendas-list-container .table-container {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+
+.vendas-list-container table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.vendas-list-container thead {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+}
+
+.vendas-list-container th {
+  padding: 1rem;
+  text-align: left;
+  color: white;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.875rem;
+}
+
+.vendas-list-container td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.vendas-list-container tbody tr {
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.vendas-list-container tbody tr:hover {
+  background: var(--gray-50);
+}
+
+.vendas-list-container tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.vendas-list-container .badge {
+  padding: 0.375rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.vendas-list-container .badge-aberta {
+  background: var(--warning);
+  color: white;
+}
+
+.vendas-list-container .badge-finalizada {
+  background: var(--success);
+  color: white;
+}
+
+.vendas-list-container .actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.vendas-list-container .btn-edit,
+.vendas-list-container .btn-delete {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.vendas-list-container .btn-edit {
+  background: var(--primary);
+  color: white;
+}
+
+.vendas-list-container .btn-delete {
+  background: var(--danger);
+  color: white;
+}
+
+.vendas-list-container .btn-edit:hover,
+.vendas-list-container .btn-delete:hover {
+  transform: translateY(-1px);
+  opacity: 0.9;
+}
+
+.vendas-list-container .empty-state {
   text-align: center;
-  padding: 40px;
-  color: #888;
-  font-size: 1.1rem;
+  padding: 3rem;
+  color: var(--gray-700);
+}
+
+.vendas-list-container .message {
+  padding: 1rem 1.5rem;
+  border-radius: var(--radius);
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+}
+
+.vendas-list-container .message.success {
+  background: #d1fae5;
+  color: #065f46;
+  border-left: 4px solid var(--success);
+}
+
+.vendas-list-container .message.error {
+  background: #fee2e2;
+  color: #991b1b;
+  border-left: 4px solid var(--danger);
 }

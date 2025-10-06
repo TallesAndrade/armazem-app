@@ -1,70 +1,124 @@
-/* Reutiliza estilos do formulário de produto */
-@import url('../../produto/produto-form/produto-form.css');
+.estoque-form-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
 
-/* Estilo para o fundo escurecido */
-.modal-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
+.estoque-form-container .form-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  box-shadow: var(--shadow-lg);
+}
+
+.estoque-form-container .form-header {
+  margin-bottom: 2rem;
+}
+
+.estoque-form-container .form-header h1 {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.estoque-form-container .produto-info {
+  background: var(--gray-50);
+  padding: 1rem;
+  border-radius: var(--radius);
+  margin-bottom: 2rem;
+}
+
+.estoque-form-container .produto-info h3 {
+  margin-bottom: 0.5rem;
+  color: var(--gray-900);
+}
+
+.estoque-form-container .produto-info p {
+  color: var(--gray-700);
+  margin: 0.25rem 0;
+}
+
+.estoque-form-container .form-group {
+  margin-bottom: 1.5rem;
+}
+
+.estoque-form-container .form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--gray-700);
+}
+
+.estoque-form-container .form-group input,
+.estoque-form-container .form-group select {
   width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.6);
-  z-index: 1000; /* Fica atrás do modal */
+  padding: 0.875rem;
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius);
+  font-size: 1rem;
 }
 
-
-/* Centraliza o conteúdo do modal */
-.modal-content {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 1010; /* Fica na frente do fundo */
-  width: 90%;
-  max-width: 500px;
+.estoque-form-container .form-group input:focus,
+.estoque-form-container .form-group select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-.current-stock {
+.estoque-form-container .form-actions {
   display: flex;
-  justify-content: space-around;
-  background-color: #e9ecef;
-  padding: 10px;
-  border-radius: 4px;
-  margin-bottom: 20px;
-  text-align: center;
+  gap: 1rem;
+  margin-top: 2rem;
 }
 
-.current-stock span {
-  font-size: 0.9rem;
-}
-
-.tabs {
-  display: flex;
-  margin-bottom: 20px;
-}
-
-.tabs button {
-  flex-grow: 1;
-  padding: 12px;
-  border: 1px solid #ccc;
-  background-color: #f0f0f0;
-  cursor: pointer;
-  border-radius: 0;
-  color: #333;
-}
-
-.tabs button:first-child {
-  border-top-left-radius: 4px;
-  border-bottom-left-radius: 4px;
-}
-
-.tabs button:last-child {
-  border-top-right-radius: 4px;
-  border-bottom-right-radius: 4px;
-}
-
-.tabs button.active-tab {
-  background-color: #007bff;
+.estoque-form-container .btn-submit {
+  flex: 1;
+  padding: 1rem;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
   color: white;
-  border-color: #007bff;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.estoque-form-container .btn-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5);
+}
+
+.estoque-form-container .btn-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.estoque-form-container .btn-cancel {
+  padding: 1rem 2rem;
+  background: var(--gray-200);
+  color: var(--gray-700);
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.estoque-form-container .btn-cancel:hover {
+  background: var(--gray-700);
+  color: white;
+}
+
+.estoque-form-container .message {
+  padding: 1rem 1.5rem;
+  border-radius: var(--radius);
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+}
+
+.estoque-form-container .message.error {
+  background: #fee2e2;
+  color: #991b1b;
+  border-left: 4px solid var(--danger);
 }

@@ -64,23 +64,25 @@ export class VendasListComponent implements OnInit {
     this.router.navigate(['/vendas', id]);
   }
 
-  deletarVenda(id: number, event: Event): void {
-    event.stopPropagation();
-    
-    if (!confirm('Deseja realmente cancelar esta venda? Os produtos serão devolvidos ao estoque.')) {
-      return;
-    }
+  // Adicione este método no vendas-list.ts existente:
 
-    this.vendaService.deletarVenda(id).subscribe({
-      next: () => {
-        this.mensagemSucesso = 'Venda cancelada com sucesso!';
-        setTimeout(() => this.mensagemSucesso = null, 3000);
-        this.carregarVendas();
-      },
-      error: (err) => {
-        this.mensagemErro = 'Erro ao cancelar venda';
-        console.error(err);
-      }
-    });
+cancelarVenda(id: number, event: Event): void {
+  event.stopPropagation();
+  
+  if (!confirm('Deseja realmente cancelar esta venda? Os produtos serão devolvidos ao estoque.')) {
+    return;
   }
+
+  this.vendaService.deletarVenda(id).subscribe({
+    next: () => {
+      this.mensagemSucesso = 'Venda cancelada com sucesso!';
+      setTimeout(() => this.mensagemSucesso = null, 3000);
+      this.carregarVendas();
+    },
+    error: (err) => {
+      this.mensagemErro = 'Erro ao cancelar venda';
+      console.error(err);
+    }
+  });
+}
 }

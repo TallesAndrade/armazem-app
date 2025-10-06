@@ -1,160 +1,144 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { Observable } from 'rxjs';
-import { debounceTime, distinctUntilChanged, startWith, switchMap } from 'rxjs/operators';
-
-import { Produto } from '../produto.model';
+import { Router, RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { ProdutoService } from '../produto.service';
+import { Produto } from '../produto.model';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   selector: 'app-produto-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, ReactiveFormsModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './produto-list.html',
   styleUrls: ['./produto-list.css']
 })
 export class ProdutoListComponent implements OnInit {
   produtos: Produto[] = [];
-  mensagemErro: string | null = null;
+  termoBusca: string = '';
   mensagemSucesso: string | null = null;
-
-  activeFilter: string = 'ativos';
-  pageTitle: string = 'Produtos Ativos';
-
-  // FormControl para o campo de busca
-  searchControl = new FormControl('');
+  mensagemErro: string | null = null;
+  loading: boolean = false;
+  
+  private searchSubject = new Subject<string>();
 
   constructor(
     private produtoService: ProdutoService,
-    private route: ActivatedRoute,
     private router: Router
   ) {}
 
   ngOnInit(): void {
-    // Detecta o filtro pela URL atual
-    const url = this.router.url;
-    if (url.includes('/produtos/ativos')) {
-      this.activeFilter = 'ativos';
-    } else if (url.includes('/produtos/inativos')) {
-      this.activeFilter = 'inativos';
-    } else if (url.includes('/produtos/todos')) {
-      this.activeFilter = 'todos';
-    }
-
-    this.atualizarTitulo();
-
-    // Configura a busca reativa
-    this.searchControl.valueChanges.pipe(
-      startWith(''),
+    this.carregarProdutos();
+    
+    this.searchSubject.pipe(
       debounceTime(300),
-      distinctUntilChanged(),
-      switchMap(searchTerm => this.carregarProdutos(searchTerm || ''))
-    ).subscribe({
-      next: (dados) => {
-        this.produtos = dados;
-        this.mensagemErro = null;
-      },
-      error: (erro) => this.handleError(erro)
+      distinctUntilChanged()
+    ).subscribe(() => {
+      this.buscarProdutos();
     });
   }
 
-  carregarProdutos(searchTerm: string): Observable<Produto[]> {
-    this.mensagemSucesso = null;
-    this.mensagemErro = null;
-
-    // Se o usuário digitou algo, chama os serviços de BUSCA
-    if (searchTerm) {
-      switch (this.activeFilter) {
-        case 'todos':
-          return this.produtoService.searchProdutos(searchTerm);
-        case 'inativos':
-          return this.produtoService.searchProdutosInativos(searchTerm);
-        default: // 'ativos'
-          return this.produtoService.searchProdutosAtivos(searchTerm);
-      }
+  carregarProdutos(): void {
+    this.loading = true;
+    const path = this.router.url;
+    
+    let observable;
+    if (path.includes('ativos')) {
+      observable = this.produtoService.getProdutosAtivos();
+    } else if (path.includes('inativos')) {
+      observable = this.produtoService.getProdutosInativos();
+    } else {
+      observable = this.produtoService.getProdutos();
     }
-    // Se a busca está vazia, chama os serviços de LISTAGEM GERAL
-    else {
-      switch (this.activeFilter) {
-        case 'todos':
-          return this.produtoService.getProductos();
-        case 'inativos':
-          return this.produtoService.getProdutosInativos();
-        default: // 'ativos'
-          return this.produtoService.getProdutosAtivos();
-      }
-    }
-  }
 
-  // Método para recarregar a lista atual
-  private recarregarLista(): void {
-    const currentSearch = this.searchControl.value || '';
-    this.carregarProdutos(currentSearch).subscribe({
-      next: (dados) => {
-        this.produtos = dados;
-        this.mensagemErro = null;
+    observable.subscribe({
+      next: (produtos) => {
+        this.produtos = produtos;
+        this.loading = false;
       },
-      error: (erro) => this.handleError(erro)
+      error: (err) => {
+        this.handleError('carregar produtos');
+        this.loading = false;
+      }
     });
   }
 
-  atualizarTitulo(): void {
-    switch (this.activeFilter) {
-      case 'todos': this.pageTitle = 'Todos os Produtos'; break;
-      case 'inativos': this.pageTitle = 'Produtos Inativos'; break;
-      default: this.pageTitle = 'Produtos Ativos'; break;
-    }
+  onSearchChange(term: string): void {
+    this.searchSubject.next(term);
   }
 
-   excluirProduto(id: number, nome: string): void {
-    if (confirm(`Tem certeza que deseja desativar o produto "${nome}"?`)) {
-      this.produtoService.deleteProduto(id).subscribe({
-        next: () => {
-          this.handleSuccess(`Produto "${nome}" desativado com sucesso.`);
-          this.recarregarLista();
-        },
-        error: (err) => {
-          this.handleError(err, 'desativar');
-        }
-      });
+  buscarProdutos(): void {
+    if (!this.termoBusca || this.termoBusca.trim() === '') {
+      this.carregarProdutos();
+      return;
     }
+
+    this.loading = true;
+    const path = this.router.url;
+    
+    let observable;
+    if (path.includes('ativos')) {
+      observable = this.produtoService.searchProdutosAtivos(this.termoBusca);
+    } else if (path.includes('inativos')) {
+      observable = this.produtoService.searchProdutosInativos(this.termoBusca);
+    } else {
+      observable = this.produtoService.searchProdutos(this.termoBusca);
+    }
+
+    observable.subscribe({
+      next: (produtos) => {
+        this.produtos = produtos;
+        this.loading = false;
+      },
+      error: (err) => {
+        this.handleError('buscar produtos');
+        this.loading = false;
+      }
+    });
   }
 
-  reativarProduto(id: number, nome: string): void {
-    if (confirm(`Tem certeza que deseja reativar o produto "${nome}"?`)) {
-      this.produtoService.activateProduto(id).subscribe({
-        next: () => {
-          this.handleSuccess(`Produto "${nome}" reativado com sucesso.`);
-          this.recarregarLista();
-        },
-        error: (err) => {
-          this.handleError(err, 'reativar');
-        }
-      });
-    }
+  navigateToForm(): void {
+    this.router.navigate(['/produtos/novo']);
+  }
+
+  editarProduto(id: number): void {
+    this.router.navigate(['/produtos/editar', id]);
+  }
+
+  desativarProduto(id: number): void {
+    if (!confirm('Deseja realmente desativar este produto?')) return;
+
+    this.produtoService.deleteProduto(id).subscribe({
+      next: () => {
+        this.handleSuccess('Produto desativado com sucesso!');
+        this.carregarProdutos();
+      },
+      error: (err) => this.handleError('desativar produto')
+    });
+  }
+
+  ativarProduto(id: number): void {
+    if (!confirm('Deseja realmente ativar este produto?')) return;
+
+    this.produtoService.activateProduto(id).subscribe({
+      next: () => {
+        this.handleSuccess('Produto ativado com sucesso!');
+        this.carregarProdutos();
+      },
+      error: (err) => this.handleError('ativar produto')
+    });
   }
 
   private handleSuccess(mensagem: string): void {
+    this.mensagemErro = null;
     this.mensagemSucesso = mensagem;
     setTimeout(() => this.mensagemSucesso = null, 3000);
   }
 
-  private handleError(erro: any, acao: string = 'buscar'): void {
-    let mensagem: string;
-    
-    if (erro.error?.message) {
-      mensagem = erro.error.message;
-    } else if (erro.message) {
-      mensagem = erro.message;
-    } else if (erro.error?.error) {
-      mensagem = `${erro.error.error} (${erro.error.status})`;
-    } else {
-      mensagem = `Não foi possível ${acao} os produtos. Verifique a conexão.`;
-    }
-    
-    this.mensagemErro = mensagem;
-    console.error('Erro detalhado:', erro);
+  private handleError(acao: string): void {
+    this.mensagemSucesso = null;
+    this.mensagemErro = `Não foi possível ${acao}. Tente novamente.`;
+    setTimeout(() => this.mensagemErro = null, 5000);
   }
 }
