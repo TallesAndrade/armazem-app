@@ -162,3 +162,8 @@
     flex-direction: column;
   }
 }
+
+.estoque-page-container .badge-zerado {
+  background: var(--danger);
+  color: white;
+}

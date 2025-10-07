@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { EstoqueService } from '../estoque.service';
 import { Estoque } from '../estoque.model';
 import { Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-estoque-page',
@@ -18,17 +18,23 @@ export class EstoquePageComponent implements OnInit {
   estoques: Estoque[] = [];
   termoBusca: string = '';
   loading: boolean = false;
-  
+
   private searchSubject = new Subject<string>();
 
   constructor(
     private estoqueService: EstoqueService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.carregarEstoques();
-    
+
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe(() => {
+      this.carregarEstoques();
+    });
+
     this.searchSubject.pipe(
       debounceTime(300),
       distinctUntilChanged()
@@ -40,12 +46,12 @@ export class EstoquePageComponent implements OnInit {
   carregarEstoques(): void {
     this.loading = true;
     const path = this.router.url;
-    
+
     let observable;
-    if (path.includes('ativos')) {
-      observable = this.estoqueService.getEstoquesAtivos();
-    } else if (path.includes('inativos')) {
+    if (path.includes('inativos')) {
       observable = this.estoqueService.getEstoquesInativos();
+    } else if (path.includes('ativos')) {
+      observable = this.estoqueService.getEstoquesAtivos();
     } else {
       observable = this.estoqueService.getTodosEstoques();
     }
@@ -74,12 +80,12 @@ export class EstoquePageComponent implements OnInit {
 
     this.loading = true;
     const path = this.router.url;
-    
+
     let observable;
-    if (path.includes('ativos')) {
-      observable = this.estoqueService.searchEstoquesAtivos(this.termoBusca);
-    } else if (path.includes('inativos')) {
+    if (path.includes('inativos')) {
       observable = this.estoqueService.searchEstoquesInativos(this.termoBusca);
+    } else if (path.includes('ativos')) {
+      observable = this.estoqueService.searchEstoquesAtivos(this.termoBusca);
     } else {
       observable = this.estoqueService.searchTodosEstoques(this.termoBusca);
     }
@@ -96,11 +102,18 @@ export class EstoquePageComponent implements OnInit {
     });
   }
 
+  isEstoqueZerado(estoque: Estoque): boolean {
+    if (estoque.ehPesavel) {
+      return (estoque.quantidadeKg ?? 0) === 0;
+    }
+    return (estoque.quantidadeUnidades ?? 0) === 0;
+  }
+
   isEstoqueBaixo(estoque: Estoque): boolean {
     if (estoque.ehPesavel) {
-      return (estoque.quantidadeKg ?? 0) < (estoque.quantidadeMinima ?? 0);
+      return (estoque.quantidadeKg ?? 0) < (estoque.quantidadeMinima ?? 0) && (estoque.quantidadeKg ?? 0) > 0;
     }
-    return (estoque.quantidadeUnidades ?? 0) < (estoque.quantidadeMinima ?? 0);
+    return (estoque.quantidadeUnidades ?? 0) < (estoque.quantidadeMinima ?? 0) && (estoque.quantidadeUnidades ?? 0) > 0;
   }
 
   ajustarEstoque(id: number): void {

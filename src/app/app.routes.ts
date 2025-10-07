@@ -29,5 +29,5 @@ export const routes: Routes = [
   { path: 'vendas/:id', component: VendasPageComponent },  // ← edição
   
   // --- ROTA CURINGA ---
-  { path: '**', redirectTo: '' }
+  { path: '**', redirectTo: '/produtos/ativos' }
 ];

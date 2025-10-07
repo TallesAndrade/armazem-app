@@ -2,8 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ProdutoService } from '../produto.service';
-import { Produto } from '../produto.model';
+import { ProdutoService, ProdutoRequest } from '../produto.service';
 
 @Component({
   selector: 'app-produto-form',
@@ -28,8 +27,8 @@ export class ProdutoFormComponent implements OnInit {
     this.produtoForm = this.fb.group({
       nome: ['', Validators.required],
       unidadeMedida: ['', Validators.required],
-      precoKg: [0, [Validators.min(0)]],
-      precoUnidade: [0, [Validators.min(0)]],
+      precoKg: [0],
+      precoUnidade: [0],
       dataValidade: ['', Validators.required],
       ehPesavel: [false]
     });
@@ -44,24 +43,36 @@ export class ProdutoFormComponent implements OnInit {
       this.carregarProduto();
     }
 
-    // Validação condicional baseada em ehPesavel
-    this.produtoForm.get('ehPesavel')?.valueChanges.subscribe(ehPesavel => {
-      this.atualizarValidacoes(ehPesavel);
+    // Reage à mudança da unidade de medida
+    this.produtoForm.get('unidadeMedida')?.valueChanges.subscribe(unidade => {
+      this.atualizarValidacoes(unidade);
     });
   }
 
-  atualizarValidacoes(ehPesavel: boolean): void {
+  atualizarValidacoes(unidadeMedida: string): void {
     const precoKg = this.produtoForm.get('precoKg');
     const precoUnidade = this.produtoForm.get('precoUnidade');
+    const ehPesavel = this.produtoForm.get('ehPesavel');
 
-    if (ehPesavel) {
+    // Limpa validações
+    precoKg?.clearValidators();
+    precoUnidade?.clearValidators();
+
+    if (unidadeMedida === 'KILO') {
+      // Produto pesável
       precoKg?.setValidators([Validators.required, Validators.min(0.01)]);
-      precoUnidade?.clearValidators();
       precoUnidade?.setValue(0);
-    } else {
+      ehPesavel?.setValue(true);
+    } else if (unidadeMedida === 'UNIDADE') {
+      // Produto por unidade
       precoUnidade?.setValidators([Validators.required, Validators.min(0.01)]);
-      precoKg?.clearValidators();
       precoKg?.setValue(0);
+      ehPesavel?.setValue(false);
+    } else {
+      // Nenhuma unidade selecionada
+      precoKg?.setValue(0);
+      precoUnidade?.setValue(0);
+      ehPesavel?.setValue(false);
     }
 
     precoKg?.updateValueAndValidity();
@@ -96,7 +107,16 @@ export class ProdutoFormComponent implements OnInit {
     }
 
     this.loading = true;
-    const request: Produto = this.produtoForm.value;
+    const formValue = this.produtoForm.value;
+
+    const request: ProdutoRequest = {
+      nome: formValue.nome,
+      unidadeMedida: formValue.unidadeMedida,
+      precoKg: formValue.precoKg || null,
+      precoUnidade: formValue.precoUnidade || null,
+      dataValidade: formValue.dataValidade,
+      ehPesavel: formValue.ehPesavel
+    };
 
     const observable = this.isEditMode && this.produtoId
       ? this.produtoService.updateProduto(this.produtoId, request)

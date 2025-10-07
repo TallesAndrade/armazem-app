@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule,NavigationEnd } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ProdutoService } from '../produto.service';
 import { Produto } from '../produto.model';
 import { Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged,filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-produto-list',
@@ -30,6 +30,12 @@ export class ProdutoListComponent implements OnInit {
 
   ngOnInit(): void {
     this.carregarProdutos();
+
+     this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe(() => {
+      this.carregarProdutos();
+    });
     
     this.searchSubject.pipe(
       debounceTime(300),
@@ -44,10 +50,10 @@ export class ProdutoListComponent implements OnInit {
     const path = this.router.url;
     
     let observable;
-    if (path.includes('ativos')) {
-      observable = this.produtoService.getProdutosAtivos();
-    } else if (path.includes('inativos')) {
+    if (path.includes('inativos')) {
       observable = this.produtoService.getProdutosInativos();
+    } else if (path.includes('ativos')) {
+      observable = this.produtoService.getProdutosAtivos();
     } else {
       observable = this.produtoService.getProdutos();
     }
@@ -78,10 +84,10 @@ export class ProdutoListComponent implements OnInit {
     const path = this.router.url;
     
     let observable;
-    if (path.includes('ativos')) {
-      observable = this.produtoService.searchProdutosAtivos(this.termoBusca);
-    } else if (path.includes('inativos')) {
+    if (path.includes('inativos')) {
       observable = this.produtoService.searchProdutosInativos(this.termoBusca);
+    } else if (path.includes('ativos')) {
+      observable = this.produtoService.searchProdutosAtivos(this.termoBusca);
     } else {
       observable = this.produtoService.searchProdutos(this.termoBusca);
     }

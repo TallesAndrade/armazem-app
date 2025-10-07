@@ -5,13 +5,8 @@
 
   <div class="toolbar">
     <div class="toolbar-top">
-      <input 
-        type="text" 
-        class="search-bar" 
-        placeholder="Buscar por nome do produto..." 
-        [(ngModel)]="termoBusca"
-        (ngModelChange)="onSearchChange($event)"
-      />
+      <input type="text" class="search-bar" placeholder="Buscar por nome do produto..." [(ngModel)]="termoBusca"
+        (ngModelChange)="onSearchChange($event)" />
     </div>
 
     <nav class="tabs">
@@ -42,19 +37,23 @@
           <td>{{ estoque.quantidadeUnidades }}</td>
           <td>{{ estoque.quantidadeMinima }}</td>
           <td>
-            <span class="badge badge-baixo" *ngIf="estoque.ativo && isEstoqueBaixo(estoque)">
+            <span class="badge badge-zerado" *ngIf="estoque.ativo && isEstoqueZerado(estoque)">
+              Zerado
+            </span>
+            <span class="badge badge-baixo"
+              *ngIf="estoque.ativo && !isEstoqueZerado(estoque) && isEstoqueBaixo(estoque)">
               Baixo
             </span>
-            <span class="badge badge-ativo" *ngIf="estoque.ativo && !isEstoqueBaixo(estoque)">
+            <span class="badge badge-ativo"
+              *ngIf="estoque.ativo && !isEstoqueZerado(estoque) && !isEstoqueBaixo(estoque)">
               OK
             </span>
             <span class="badge badge-inativo" *ngIf="!estoque.ativo">
               Inativo
             </span>
           </td>
-          <td>
-            <button class="btn-ajustar" (click)="ajustarEstoque(estoque.id)">Ajustar Saldo</button>
-          </td>
+
+          <button class="btn-ajustar" (click)="ajustarEstoque(estoque.id)">Ajustar Saldo</button>
         </tr>
       </tbody>
     </table>
