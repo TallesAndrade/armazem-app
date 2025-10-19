@@ -1,0 +1,91 @@
+<div class="user-form-container">
+  <div class="form-card">
+    <div class="form-header">
+      <h1>➕ Criar Novo Usuário</h1>
+      <p>Apenas administradores podem criar usuários</p>
+    </div>
+
+    <div *ngIf="mensagemSucesso" class="message success">{{ mensagemSucesso }}</div>
+    <div *ngIf="mensagemErro" class="message error">{{ mensagemErro }}</div>
+
+    <form [formGroup]="userForm" (ngSubmit)="salvar()">
+      <div class="form-group">
+        <label for="username">Usuário *</label>
+        <input 
+          id="username" 
+          type="text" 
+          formControlName="username" 
+          placeholder="Digite o nome de usuário"
+          [class.invalid]="username?.invalid && username?.touched"
+        />
+        <div class="error-message" *ngIf="username?.invalid && username?.touched">
+          <small *ngIf="username?.errors?.['required']">Usuário é obrigatório</small>
+          <small *ngIf="username?.errors?.['minlength']">Mínimo 3 caracteres</small>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email *</label>
+        <input 
+          id="email" 
+          type="email" 
+          formControlName="email" 
+          placeholder="usuario@email.com"
+          [class.invalid]="email?.invalid && email?.touched"
+        />
+        <div class="error-message" *ngIf="email?.invalid && email?.touched">
+          <small *ngIf="email?.errors?.['required']">Email é obrigatório</small>
+          <small *ngIf="email?.errors?.['email']">Email inválido</small>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Senha *</label>
+        <input 
+          id="password" 
+          type="password" 
+          formControlName="password" 
+          placeholder="Mínimo 6 caracteres"
+          [class.invalid]="password?.invalid && password?.touched"
+        />
+        <div class="error-message" *ngIf="password?.invalid && password?.touched">
+          <small *ngIf="password?.errors?.['required']">Senha é obrigatória</small>
+          <small *ngIf="password?.errors?.['minlength']">Mínimo 6 caracteres</small>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword">Confirmar Senha *</label>
+        <input 
+          id="confirmPassword" 
+          type="password" 
+          formControlName="confirmPassword" 
+          placeholder="Digite a senha novamente"
+          [class.invalid]="confirmPassword?.invalid && confirmPassword?.touched"
+        />
+        <div class="error-message" *ngIf="userForm.errors?.['passwordMismatch'] && confirmPassword?.touched">
+          <small>As senhas não coincidem</small>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="role">Tipo de Usuário *</label>
+        <select id="role" formControlName="role">
+          <option [value]="Role.USER">Usuário Comum</option>
+          <option [value]="Role.ADMIN">Administrador</option>
+        </select>
+        <small class="hint">
+          👤 Usuário Comum: Pode fazer vendas<br>
+          👑 Administrador: Acesso total ao sistema
+        </small>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn-submit" [disabled]="userForm.invalid || loading">
+          {{ loading ? '⏳ Criando...' : '✅ Criar Usuário' }}
+        </button>
+        <button type="button" class="btn-cancel" (click)="cancelar()">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>

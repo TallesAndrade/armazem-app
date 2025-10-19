@@ -6,6 +6,7 @@ import { EstoqueService } from '../estoque.service';
 import { Estoque } from '../estoque.model';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter } from 'rxjs/operators';
+import { AuthService } from '../../auth/services/auth.service';
 
 @Component({
   selector: 'app-estoque-page',
@@ -23,7 +24,9 @@ export class EstoquePageComponent implements OnInit {
 
   constructor(
     private estoqueService: EstoqueService,
-    private router: Router
+    private router: Router,
+    private authService: AuthService
+
   ) { }
 
   ngOnInit(): void {
@@ -118,5 +121,9 @@ export class EstoquePageComponent implements OnInit {
 
   ajustarEstoque(id: number): void {
     this.router.navigate(['/estoque/ajustar', id]);
+  }
+
+   isAdmin(): boolean {
+    return this.authService.isAdmin();
   }
 }

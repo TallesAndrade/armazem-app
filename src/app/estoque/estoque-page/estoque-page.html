@@ -53,7 +53,15 @@
             </span>
           </td>
 
-          <button class="btn-ajustar" (click)="ajustarEstoque(estoque.id)">Ajustar Saldo</button>
+          <td>
+            <button class="btn-ajustar" (click)="ajustarEstoque(estoque.id)" *ngIf="isAdmin()">
+              Ajustar Saldo
+            </button>
+
+            <span *ngIf="!isAdmin()" class="text-readonly">
+              👁️ Somente leitura
+            </span>
+          </td>
         </tr>
       </tbody>
     </table>

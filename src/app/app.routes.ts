@@ -3,31 +3,94 @@ import { ProdutoListComponent } from './produto/produto-list/produto-list';
 import { ProdutoFormComponent } from './produto/produto-form/produto-form';
 import { EstoquePageComponent } from './estoque/estoque-page/estoque-page';
 import { EstoqueFormComponent } from './estoque/estoque-form/estoque-form';
-import { VendasListComponent } from './vendas/vendas-list/vendas-list';  // ← ADICIONAR
+import { VendasListComponent } from './vendas/vendas-list/vendas-list';
 import { VendasPageComponent } from './vendas/vendas-page/vendas-page';
+import { LoginComponent } from './auth/login/login.component';
+import { UserFormComponent } from './user/user-form/user-form.component';
+import { AuthGuard } from './auth/guards/auth.guard';
+import { AdminGuard } from './auth/guards/admin.guard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'produtos/ativos', pathMatch: 'full' },
+  // ROTA PÚBLICA
+  { path: 'login', component: LoginComponent },
 
-  // --- ROTAS DE PRODUTOS ---
-  { path: 'produtos/novo', component: ProdutoFormComponent },
-  { path: 'produtos/editar/:id', component: ProdutoFormComponent },
-  { path: 'produtos/ativos', component: ProdutoListComponent },
-  { path: 'produtos/inativos', component: ProdutoListComponent },
-  { path: 'produtos/todos', component: ProdutoListComponent },
-  { path: 'produtos', redirectTo: 'produtos/ativos', pathMatch: 'full' },
+  // --- ROTAS ADMIN (só admin) ---
+  { 
+    path: 'produtos/novo', 
+    component: ProdutoFormComponent,
+    canActivate: [AdminGuard]
+  },
+  { 
+    path: 'produtos/editar/:id', 
+    component: ProdutoFormComponent,
+    canActivate: [AdminGuard]
+  },
+  { 
+    path: 'estoque/ajustar/:id', 
+    component: EstoqueFormComponent,
+    canActivate: [AdminGuard]
+  },
+  { 
+    path: 'users/novo', 
+    component: UserFormComponent,
+    canActivate: [AdminGuard]
+  },
 
-  // --- ROTAS DE ESTOQUE ---
-  { path: 'estoque/ajustar/:id', component: EstoqueFormComponent },
-  { path: 'estoque/ativos', component: EstoquePageComponent },
-  { path: 'estoque/inativos', component: EstoquePageComponent },
-  { path: 'estoque/todos', component: EstoquePageComponent },
-  { path: 'estoque', redirectTo: 'estoque/ativos', pathMatch: 'full' },
-  
-  // --- ROTAS DE VENDAS (MODIFICADO) ---
-  { path: 'vendas', component: VendasListComponent },      // ← lista
-  { path: 'vendas/:id', component: VendasPageComponent },  // ← edição
-  
-  // --- ROTA CURINGA ---
-  { path: '**', redirectTo: '/produtos/ativos' }
+  // --- ROTAS PROTEGIDAS (qualquer usuário autenticado) ---
+  { 
+    path: 'produtos/ativos', 
+    component: ProdutoListComponent,
+    canActivate: [AuthGuard]
+  },
+  { 
+    path: 'produtos/inativos', 
+    component: ProdutoListComponent,
+    canActivate: [AuthGuard]
+  },
+  { 
+    path: 'produtos/todos', 
+    component: ProdutoListComponent,
+    canActivate: [AuthGuard]
+  },
+  { 
+    path: 'produtos', 
+    redirectTo: 'produtos/ativos', 
+    pathMatch: 'full' 
+  },
+
+  { 
+    path: 'estoque/ativos', 
+    component: EstoquePageComponent,
+    canActivate: [AuthGuard]
+  },
+  { 
+    path: 'estoque/inativos', 
+    component: EstoquePageComponent,
+    canActivate: [AuthGuard]
+  },
+  { 
+    path: 'estoque/todos', 
+    component: EstoquePageComponent,
+    canActivate: [AuthGuard]
+  },
+  { 
+    path: 'estoque', 
+    redirectTo: 'estoque/ativos', 
+    pathMatch: 'full' 
+  },
+
+  { 
+    path: 'vendas', 
+    component: VendasListComponent,
+    canActivate: [AuthGuard]
+  },
+  { 
+    path: 'vendas/:id', 
+    component: VendasPageComponent,
+    canActivate: [AuthGuard]
+  },
+
+  // ROTAS PADRÃO
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
+  { path: '**', redirectTo: 'login' }
 ];

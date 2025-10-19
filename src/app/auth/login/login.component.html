@@ -1,0 +1,57 @@
+
+<div class="login-container">
+  <div class="login-card">
+    <div class="login-header">
+      <h1>🔐 Armazém da Margarete</h1>
+      <p>Faça login para continuar</p>
+    </div>
+
+    <div *ngIf="errorMessage" class="alert alert-error">
+      {{ errorMessage }}
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="username">Usuário</label>
+        <input 
+          id="username" 
+          type="text" 
+          formControlName="username" 
+          placeholder="Digite seu usuário"
+          [class.invalid]="username?.invalid && username?.touched"
+        />
+        <div class="error-message" *ngIf="username?.invalid && username?.touched">
+          <small *ngIf="username?.errors?.['required']">Usuário é obrigatório</small>
+          <small *ngIf="username?.errors?.['minlength']">Mínimo 3 caracteres</small>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Senha</label>
+        <input 
+          id="password" 
+          type="password" 
+          formControlName="password" 
+          placeholder="Digite sua senha"
+          [class.invalid]="password?.invalid && password?.touched"
+        />
+        <div class="error-message" *ngIf="password?.invalid && password?.touched">
+          <small *ngIf="password?.errors?.['required']">Senha é obrigatória</small>
+          <small *ngIf="password?.errors?.['minlength']">Mínimo 6 caracteres</small>
+        </div>
+      </div>
+
+      <button 
+        type="submit" 
+        class="btn-login" 
+        [disabled]="loginForm.invalid || loading"
+      >
+        {{ loading ? '⏳ Entrando...' : '🚀 Entrar' }}
+      </button>
+    </form>
+
+    <div class="login-footer">
+      <p class="hint">💡 Use suas credenciais de administrador</p>
+    </div>
+  </div>
+</div>

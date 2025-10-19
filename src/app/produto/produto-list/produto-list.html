@@ -1,21 +1,18 @@
 <div class="produto-list-container">
   <div class="page-header">
-    <h1>Produtos</h1>
-    <button class="btn-add" (click)="navigateToForm()">+ Adicionar Produto</button>
-  </div>
+  <h1>Produtos</h1>
+  <button class="btn-add" (click)="navigateToForm()" *ngIf="isAdmin()">
+    + Adicionar Produto
+  </button>
+</div>
 
   <div *ngIf="mensagemSucesso" class="message success">{{ mensagemSucesso }}</div>
   <div *ngIf="mensagemErro" class="message error">{{ mensagemErro }}</div>
 
   <div class="toolbar">
     <div class="toolbar-top">
-      <input 
-        type="text" 
-        class="search-bar" 
-        placeholder="Buscar por nome do produto..." 
-        [(ngModel)]="termoBusca"
-        (ngModelChange)="onSearchChange($event)"
-      />
+      <input type="text" class="search-bar" placeholder="Buscar por nome do produto..." [(ngModel)]="termoBusca"
+        (ngModelChange)="onSearchChange($event)" />
     </div>
 
     <nav class="tabs">
@@ -51,9 +48,23 @@
             </span>
           </td>
           <td class="actions">
-            <button class="btn-edit" (click)="editarProduto(produto.id)" *ngIf="produto.ativo">Editar</button>
-            <button class="btn-delete" (click)="desativarProduto(produto.id)" *ngIf="produto.ativo">Desativar</button>
-            <button class="btn-activate" (click)="ativarProduto(produto.id)" *ngIf="!produto.ativo">Ativar</button>
+            <!-- SÓ ADMIN VÊ OS BOTÕES -->
+            <ng-container *ngIf="isAdmin()">
+              <button class="btn-edit" (click)="editarProduto(produto.id)" *ngIf="produto.ativo">
+                Editar
+              </button>
+              <button class="btn-delete" (click)="desativarProduto(produto.id)" *ngIf="produto.ativo">
+                Desativar
+              </button>
+              <button class="btn-activate" (click)="ativarProduto(produto.id)" *ngIf="!produto.ativo">
+                Ativar
+              </button>
+            </ng-container>
+
+            <!-- USUÁRIO COMUM VÊ ISSO -->
+            <span *ngIf="!isAdmin()" class="text-readonly">
+              👁️ Somente leitura
+            </span>
           </td>
         </tr>
       </tbody>

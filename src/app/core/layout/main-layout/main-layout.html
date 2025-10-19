@@ -3,17 +3,61 @@
     <div class="logo">
       <a routerLink="/">Armazém da Margarete</a>
     </div>
-    <ul class="nav-links">
+    
+    <ul class="nav-links" *ngIf="currentUser">
       <li>
-        <a routerLink="/produtos" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: false}">Produtos</a>
+        <a routerLink="/produtos" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: false}">
+          📦 Produtos
+        </a>
       </li>
       <li>
-        <a routerLink="/estoque" routerLinkActive="active-link">Estoque</a>
+        <a routerLink="/estoque" routerLinkActive="active-link">
+          📊 Estoque
+        </a>
       </li>
       <li>
-        <a routerLink="/vendas" routerLinkActive="active-link">Vendas</a>
+        <a routerLink="/vendas" routerLinkActive="active-link">
+          💰 Vendas
+        </a>
       </li>
     </ul>
+
+    <!-- DROPDOWN DO USUÁRIO -->
+    <div class="user-menu" *ngIf="currentUser">
+      <button class="user-button" (click)="toggleDropdown()">
+        <span class="user-icon">👤</span>
+        <span class="username">{{ currentUser.username }}</span>
+        <span class="role-badge" [class.admin]="isAdmin" [class.user]="!isAdmin">
+          {{ currentUser.role }}
+        </span>
+        <span class="arrow" [class.open]="dropdownOpen">▼</span>
+      </button>
+
+      <div class="dropdown" *ngIf="dropdownOpen">
+        <button class="dropdown-item" (click)="viewProfile()">
+          <span class="icon">📋</span>
+          <span>Meu Perfil</span>
+        </button>
+        
+        <!-- SÓ MOSTRA SE FOR ADMIN -->
+        <a 
+          class="dropdown-item" 
+          *ngIf="isAdmin" 
+          routerLink="/users/novo"
+          (click)="closeDropdown()"
+        >
+          <span class="icon">➕</span>
+          <span>Criar Usuário</span>
+        </a>
+        
+        <div class="dropdown-divider"></div>
+        
+        <button class="dropdown-item logout" (click)="logout()">
+          <span class="icon">🚪</span>
+          <span>Sair</span>
+        </button>
+      </div>
+    </div>
   </nav>
 </header>
 

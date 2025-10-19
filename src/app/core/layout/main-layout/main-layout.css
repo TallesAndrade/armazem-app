@@ -56,3 +56,139 @@
   padding: 20px;
   background-color: #f4f4f4;
 }
+
+.user-menu {
+  position: relative;
+}
+
+.user-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius);
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.user-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.user-icon {
+  font-size: 1.25rem;
+}
+
+.username {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.role-badge {
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.role-badge.admin {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  color: #78350f;
+  box-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+}
+
+.role-badge.user {
+  background: linear-gradient(135deg, #84fab0, #8fd3f4);
+  color: #065f46;
+}
+
+.arrow {
+  font-size: 0.75rem;
+  transition: transform 0.2s;
+}
+
+.arrow.open {
+  transform: rotate(180deg);
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  min-width: 220px;
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  animation: dropdownSlide 0.2s ease;
+  z-index: 1000;
+}
+
+@keyframes dropdownSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.875rem 1.25rem;
+  background: none;
+  border: none;
+  color: var(--gray-900);
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.dropdown-item:hover {
+  background: var(--gray-100);
+}
+
+.dropdown-item.logout {
+  color: var(--danger);
+}
+
+.dropdown-item.logout:hover {
+  background: #fee2e2;
+}
+
+.dropdown-item .icon {
+  font-size: 1.1rem;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: var(--gray-200);
+  margin: 0.5rem 0;
+}
+
+@media (max-width: 768px) {
+  .user-button {
+    padding: 0.5rem;
+  }
+  
+  .username {
+    display: none;
+  }
+  
+  .dropdown {
+    right: -1rem;
+  }
+}

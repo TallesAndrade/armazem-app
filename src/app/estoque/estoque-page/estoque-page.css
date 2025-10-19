@@ -167,3 +167,8 @@
   background: var(--danger);
   color: white;
 }
+.text-readonly {
+  color: var(--gray-700);
+  font-size: 0.875rem;
+  font-style: italic;
+}

@@ -220,11 +220,19 @@
   .produto-list-container .toolbar-top {
     flex-direction: column;
   }
+
   .produto-list-container table {
     font-size: 0.875rem;
   }
+
   .produto-list-container th,
   .produto-list-container td {
     padding: 0.75rem 0.5rem;
+  }
+
+  .text-readonly {
+    color: var(--gray-700);
+    font-size: 0.875rem;
+    font-style: italic;
   }
 }

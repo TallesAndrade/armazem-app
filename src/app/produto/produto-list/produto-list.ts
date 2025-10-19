@@ -6,6 +6,7 @@ import { ProdutoService } from '../produto.service';
 import { Produto } from '../produto.model';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged,filter } from 'rxjs/operators';
+import { AuthService } from '../../auth/services/auth.service';
 
 @Component({
   selector: 'app-produto-list',
@@ -25,7 +26,8 @@ export class ProdutoListComponent implements OnInit {
 
   constructor(
     private produtoService: ProdutoService,
-    private router: Router
+    private router: Router,
+    private authService:AuthService
   ) {}
 
   ngOnInit(): void {
@@ -146,5 +148,9 @@ export class ProdutoListComponent implements OnInit {
     this.mensagemSucesso = null;
     this.mensagemErro = `Não foi possível ${acao}. Tente novamente.`;
     setTimeout(() => this.mensagemErro = null, 5000);
+  }
+
+  isAdmin(): boolean {
+    return this.authService.isAdmin();
   }
 }
