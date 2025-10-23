@@ -9,6 +9,7 @@ import { LoginComponent } from './auth/login/login.component';
 import { UserFormComponent } from './user/user-form/user-form.component';
 import { AuthGuard } from './auth/guards/auth.guard';
 import { AdminGuard } from './auth/guards/admin.guard';
+import { ProfileComponent } from './user/profile/profile.component';
 
 export const routes: Routes = [
   // ROTA PÚBLICA
@@ -87,6 +88,12 @@ export const routes: Routes = [
   { 
     path: 'vendas/:id', 
     component: VendasPageComponent,
+    canActivate: [AuthGuard]
+  },
+
+  {
+    path: 'perfil',
+    component: ProfileComponent,
     canActivate: [AuthGuard]
   },
 

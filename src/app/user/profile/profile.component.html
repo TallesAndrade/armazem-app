@@ -1,0 +1,55 @@
+<div class="profile-container">
+  <div class="profile-card" *ngIf="!loading && user">
+    <div class="profile-header">
+      <h1>👤 Meu Perfil</h1>
+    </div>
+
+    <div class="profile-content">
+      <div class="form-group">
+        <label>Usuário</label>
+        <input type="text" [value]="user.username" readonly />
+        <small class="hint">Não editável</small>
+      </div>
+
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" [value]="user.email || 'Não informado'" readonly />
+      </div>
+
+      <div class="form-group">
+        <label>Tipo de Conta</label>
+        <input type="text" [value]="user.role" readonly />
+        <small class="hint">Não editável</small>
+      </div>
+
+      <div class="profile-actions">
+        <button class="btn-primary" (click)="openPasswordModal()">
+          🔑 Alterar Senha
+        </button>
+        <button class="btn-secondary" (click)="openEmailModal()">
+          ✉️ Alterar Email
+        </button>
+      </div>
+
+      <div class="profile-footer">
+        <button class="btn-back" (click)="voltar()">Voltar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="loading-state" *ngIf="loading">
+    <p>Carregando perfil...</p>
+  </div>
+</div>
+
+<app-change-email-modal 
+  *ngIf="showEmailModal"
+  (close)="closeEmailModal()"
+  (emailChanged)="onEmailChanged()"
+></app-change-email-modal>
+
+<app-change-password-modal
+  *ngIf="showPasswordModal"
+  (close)="closePasswordModal()"
+  (passwordChanged)="onPasswordChanged()"
+></app-change-password-modal>

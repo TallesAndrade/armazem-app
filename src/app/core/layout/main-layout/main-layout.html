@@ -7,17 +7,17 @@
     <ul class="nav-links" *ngIf="currentUser">
       <li>
         <a routerLink="/produtos" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: false}">
-          📦 Produtos
+          Produtos
         </a>
       </li>
       <li>
         <a routerLink="/estoque" routerLinkActive="active-link">
-          📊 Estoque
+          Estoque
         </a>
       </li>
       <li>
         <a routerLink="/vendas" routerLinkActive="active-link">
-          💰 Vendas
+          Vendas
         </a>
       </li>
     </ul>
@@ -27,9 +27,6 @@
       <button class="user-button" (click)="toggleDropdown()">
         <span class="user-icon">👤</span>
         <span class="username">{{ currentUser.username }}</span>
-        <span class="role-badge" [class.admin]="isAdmin" [class.user]="!isAdmin">
-          {{ currentUser.role }}
-        </span>
         <span class="arrow" [class.open]="dropdownOpen">▼</span>
       </button>
 

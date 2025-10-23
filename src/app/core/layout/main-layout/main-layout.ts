@@ -1,3 +1,4 @@
+
 import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
@@ -19,10 +20,9 @@ export class MainLayoutComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
-    // Subscreve para mudanças no usuário
     this.authService.currentUser$.subscribe(user => {
       this.currentUser = user;
       this.isAdmin = this.authService.isAdmin();
@@ -37,7 +37,6 @@ export class MainLayoutComponent implements OnInit {
     this.dropdownOpen = false;
   }
 
-  // Fecha dropdown ao clicar fora
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
@@ -48,7 +47,7 @@ export class MainLayoutComponent implements OnInit {
 
   viewProfile(): void {
     this.closeDropdown();
-    alert(`👤 Perfil de ${this.currentUser?.username}\n📧 ${this.currentUser?.email}\n👑 ${this.currentUser?.role}`);
+    this.router.navigate(['/perfil']);
   }
 
   logout(): void {

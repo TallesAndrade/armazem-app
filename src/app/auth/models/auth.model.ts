@@ -1,3 +1,4 @@
+// src/app/auth/models/auth.model.ts
 
 export interface LoginRequest {
   username: string;
@@ -27,8 +28,10 @@ export interface CreateUserRequest {
   role: Role;
 }
 
+// ✅ ADICIONAR O CAMPO ROLE
 export interface JwtPayload {
-  sub: string;      
-  exp: number;      
-  iss: string;      
+  sub: string;       
+  exp: number;       
+  iss: string;     
+  role: string;      
 }

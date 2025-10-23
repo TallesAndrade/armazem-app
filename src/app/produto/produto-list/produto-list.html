@@ -1,18 +1,19 @@
+
 <div class="produto-list-container">
   <div class="page-header">
-  <h1>Produtos</h1>
-  <button class="btn-add" (click)="navigateToForm()" *ngIf="isAdmin()">
-    + Adicionar Produto
-  </button>
-</div>
+    <h1>Produtos</h1>
+    <button class="btn-add" (click)="navigateToForm()" *ngIf="isAdmin()">
+      Adicionar Produto
+    </button>
+  </div>
 
   <div *ngIf="mensagemSucesso" class="message success">{{ mensagemSucesso }}</div>
   <div *ngIf="mensagemErro" class="message error">{{ mensagemErro }}</div>
 
   <div class="toolbar">
     <div class="toolbar-top">
-      <input type="text" class="search-bar" placeholder="Buscar por nome do produto..." [(ngModel)]="termoBusca"
-        (ngModelChange)="onSearchChange($event)" />
+      <input type="text" class="search-bar" placeholder="Buscar por nome do produto..." 
+        [(ngModel)]="termoBusca" (ngModelChange)="onSearchChange($event)" />
     </div>
 
     <nav class="tabs">
@@ -26,7 +27,6 @@
     <table *ngIf="produtos.length > 0; else semProdutos">
       <thead>
         <tr>
-          <th>ID</th>
           <th>Nome</th>
           <th>Preço (Unidade)</th>
           <th>Preço (KG)</th>
@@ -37,7 +37,6 @@
       </thead>
       <tbody>
         <tr *ngFor="let produto of produtos">
-          <td>{{ produto.id }}</td>
           <td>{{ produto.nome }}</td>
           <td>{{ produto.precoUnidade | currency:'BRL' }}</td>
           <td>{{ produto.precoKg | currency:'BRL' }}</td>
@@ -48,7 +47,6 @@
             </span>
           </td>
           <td class="actions">
-            <!-- SÓ ADMIN VÊ OS BOTÕES -->
             <ng-container *ngIf="isAdmin()">
               <button class="btn-edit" (click)="editarProduto(produto.id)" *ngIf="produto.ativo">
                 Editar
@@ -61,10 +59,7 @@
               </button>
             </ng-container>
 
-            <!-- USUÁRIO COMUM VÊ ISSO -->
-            <span *ngIf="!isAdmin()" class="text-readonly">
-              👁️ Somente leitura
-            </span>
+            <span *ngIf="!isAdmin()" class="text-readonly"></span>
           </td>
         </tr>
       </tbody>
